@@ -14,3 +14,4 @@ print(random.choice(list(output.items())))
 #print(output.keys())
 #print(output.values())
 print(len(output.keys()))
+

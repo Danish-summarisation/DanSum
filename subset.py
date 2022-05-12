@@ -1,5 +1,6 @@
 import random
 import pickle
+import json
 
 size = 1000 # set size of subset here and run the script
 
@@ -17,8 +18,11 @@ post_sub = post[:size]
 with open('post' + str(size) + '.txt', 'w') as f:
     f.writelines(post_sub)
 
-#print(pre_sub)
-pre_sub_short = [i[:-1] for i in pre_sub] #removes "\n" (so it matches key in embeddings.pkl)
+
+#removes "\n" (so it matches key in embeddings.pkl)
+pre_sub_short = [i.replace('\n', '') for i in pre_sub] # better way?
+post_sub_short = [i.replace('\n', '') for i in post_sub] # better way?
+
 
 # EMBEDDINGS
 
@@ -28,14 +32,44 @@ with open('embeddings.pkl', 'rb') as f:
     data = pickle.load(f)
 
 print('--- loaded all embeddings ---')
+#print(len(data)) #2261464
 
 # subset
-dict_sub = { key:value for key, value in data.items() if key in pre_sub_short}
+#dict_sub = { key:value for key, value in data.items() if key in pre_sub_short}
+dict_sub = {key: data[key] for key in data.keys() & set(pre_sub_short)}
 
+
+#save pickle
 a_file = open('embeddings' + str(size) + '.pkl', 'wb') #wb means write binary
 pickle.dump(dict_sub, a_file) #save the subsetted dictionary
 a_file.close()
 
+
 print('SIZE OF SUBSET DICTIONARY:')
 print(len(dict_sub.keys())) #hmmmm, for 1000 it's only 978 - what could be wrong?
 print('--- YAAAAAY ALL DONE :D ---')
+
+
+# DO IT
+
+
+
+n = [pre_sub_short[i] == list(dict_sub.items())[i][0] for i in range(len(pre_sub_short))]
+
+
+indexes = [i for i, x in enumerate(n) if x]
+
+
+
+# TRY HERE
+len(pre_sub_short) # 1000
+len(dict_sub) # 981
+
+
+good_indexes = [pre_sub_short.index(i) for i in dict_sub.keys()]
+
+
+en_caps = [pre_sub_short[i] for i in good_indexes]
+
+da_caps = [pre_sub_short[i] for i in good_indexes]
+
