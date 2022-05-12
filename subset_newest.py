@@ -28,7 +28,7 @@ post_sub_short = [i.replace('\n', '') for i in post_sub] # better way?
 
 print('--- gonna loady load now ---')
 # load in all embeddings
-with open('embeddings.pkl', 'rb') as f:
+with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/embeddings.pkl', 'rb') as f:
     data = pickle.load(f)
 
 print('--- loaded all embeddings ---')
@@ -69,8 +69,8 @@ da = [i + '\n' for i in da_caps]
 
 
 # SAVE IT
-with open('en_981.txt', 'w') as f:
+with open('en_981_HER.txt', 'w') as f:
     f.writelines(en)
 
-with open('da_981.txt', 'w') as f:
+with open('da_981_HER.txt', 'w') as f:
     f.writelines(da)

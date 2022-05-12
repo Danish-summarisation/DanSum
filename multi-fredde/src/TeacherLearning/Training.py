@@ -3,7 +3,7 @@ import tensorflow as tf
 import transformers
 import numpy as np
 import tqdm
-
+import pickle
 
 
 def prepareDataset(tokenizer, numValidationSamples):
@@ -14,11 +14,14 @@ def prepareDataset(tokenizer, numValidationSamples):
     # Pre-computed CLIP-Text encoder embeddings for 2 Million images, can be found here:
     # https://drive.google.com/drive/folders/1I9a7naSZubUATWzLFv61DQMWyFlF7wR5
 
-    sentences = None
-    emeddings = None
+    with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/da_981_n.txt') as f:
+        sentences = f.readlines()
+    with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/emb_981_n.pkl', 'rb') as f:
+        embeddings = pickle.load(f)
+    
     print("Number of total training samples:", len(sentences))
 
-    inSents, embs = shuffleData(sentences, emeddings)  # Shuffle before selecting validation data
+    inSents, embs = shuffleData(sentences, embeddings)  # Shuffle before selecting validation data
     trainSents, trainEmbs = inSents[numValidationSamples:], embs[numValidationSamples:]
     evalSents, evalEmbs = inSents[:numValidationSamples], embs[:numValidationSamples]
     evalIds, evalAtt = Utils.batchEncode(evalSents, tokenizer)
