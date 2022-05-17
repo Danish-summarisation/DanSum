@@ -16,7 +16,7 @@ def prepareDataset(tokenizer, numValidationSamples):
 
     with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/da_981_n.txt') as f:
         sentences = f.readlines()
-    with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/emb_981_n.pkl', 'rb') as f:
+    with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/embeddings_only_981.pkl', 'rb') as f:
         embeddings = pickle.load(f)
     
     print("Number of total training samples:", len(sentences))
@@ -34,7 +34,17 @@ def prepareDataset(tokenizer, numValidationSamples):
 
 def shuffleData(sents, embs):
     shuffleOrder = np.random.choice(range(len(sents)), len(sents), replace=False)
+    # ---
+    print('--- HERE HALLO AAAAH')
+    print(len(shuffleOrder))
+    print(type(shuffleOrder))
+    print(len(sents))
+    print(type(sents))
+    print(len(embs))
+    print(type(embs))
+    # ---
     f = lambda x: [x[i] for i in shuffleOrder]
+    
     return f(sents), f(embs)
 
 
@@ -46,7 +56,7 @@ def createModel(modelBase, clipEmbeddingSize):
 
 def trainStudentTextEncoder():
     modelBase = 'distilbert-base-multilingual-cased'
-    numValidationSamples = 2000
+    numValidationSamples = 200 # CHANGE HERE
     clipEmbeddingSize = 640
     learningRate = 5e-5
     batchSize = 64

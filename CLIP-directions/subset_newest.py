@@ -28,7 +28,7 @@ post_sub_short = [i.replace('\n', '') for i in post_sub] # better way?
 
 print('--- gonna loady load now ---')
 # load in all embeddings
-with open('embeddings.pkl', 'rb') as f:
+with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/embeddings.pkl', 'rb') as f:
     data = pickle.load(f)
 
 print('--- loaded all embeddings ---')
@@ -50,15 +50,15 @@ print(len(dict_sub.keys())) #hmmmm, for 1000 it's only 978 - what could be wrong
 print('--- YAAAAAY ALL DONE :D ---')
 
 
-# DO IT
+# MAKE LIST OF JUST THE 981 EMBEDDINGS (instead of the dict)
+with open('C:/Users/idaba/OneDrive/Dokumenter/COGNITIVE_SCIENCE/data_science/data-science-exam/emb_981.pkl', 'rb') as f:
+        embeddings = pickle.load(f)
 
+emb_list = list(embeddings.values())
 
-
-n = [pre_sub_short[i] == list(dict_sub.items())[i][0] for i in range(len(pre_sub_short))]
-
-
-indexes = [i for i, x in enumerate(n) if x]
-
+a_file = open('embeddings_only_981.pkl', 'wb') #wb means write binary
+pickle.dump(emb_list, a_file) #save the subsetted dictionary
+a_file.close()
 
 
 # TRY HERE
@@ -70,6 +70,17 @@ good_indexes = [pre_sub_short.index(i) for i in dict_sub.keys()]
 
 
 en_caps = [pre_sub_short[i] for i in good_indexes]
+da_caps = [post_sub_short[i] for i in good_indexes]
 
-da_caps = [pre_sub_short[i] for i in good_indexes]
 
+#add \n again:
+en = [i + '\n' for i in en_caps]
+da = [i + '\n' for i in da_caps]
+
+
+# SAVE IT
+with open('en_981_HER.txt', 'w') as f:
+    f.writelines(en)
+
+with open('da_981_HER.txt', 'w') as f:
+    f.writelines(da)
