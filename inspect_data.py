@@ -1,6 +1,7 @@
 # This script explores different aspects of the DaNewsroom dataset.
 # %%
 import random
+from unittest import case
 import numpy as np
 import pandas as pd
 import datasets
@@ -11,6 +12,7 @@ from sklearn.model_selection import train_test_split
 # %% LOAD DATA
 
 df = pd.read_json(path_or_buf = 'danewsroom/danewsroom.jsonl.gz', lines=True)
+
 
 # %% INSPECT DATA STRUCTURE
 print(type(df)) # pandas.core.frame.DataFrame
@@ -31,10 +33,28 @@ print(df.info())
 df_abs = df.loc[df['density_bin'] == 'abstractive']
 len(df_abs) # 287205
 
+# %% MAKE SMALL SUBSETS FOR TESTING MODEL SPEED
+df1000 = df_abs[:1000]
+df10000 = df_abs[:10000]
+
+df1000.to_json(r'abs1000.json')
+df10000.to_json(r'abs10000.json')
+
+# %% SAVE ABSTRACTIVE SUBSET
+df_abs.to_json(r'abs_sums.json')
+
 
 # %% INSPECT
 pd.set_option('display.max_colwidth', None) # show full entry
-print(df_abs['text'].sample())
+print(df_abs.sample())
+
+# %% CHECK DIFFERENT SITES
+
+# look at dif sites
+# see conventions
+# some of them might need title included in summary - some NOT?!
+
+
 
 
 
@@ -52,31 +72,33 @@ print(medium['summary'].sample(n=2))
 print(low['summary'].sample(n=2))
 
 
-# %% CHECK IF TEXT CONTAINS SUMMARY
-
-doubles = [summary for summary in df_abs['summary'] if summary in df_abs['text']]
-print(len(doubles))
-
-# %%
-
-d = {'text': ['du er sød, yay!', 'hunden er død. åh nej. det var skidt.'], 'sum': ['han kan.', 'åh nej.']}
-test = pd.DataFrame(data=d)
-# %%
-doubles = [summary for summary in test['sum'] if summary in test['text']]
-len(doubles)
-
-#doubles = [test.loc[test['text'].str.contains(summary, case=False)] for summary in test['sum']]
-#doubles = [[text.loc[text['text']].str.contains(summary) for summary in text] for text in test['text']]
-doubles = [[summary for summary in text['summary'] if text['summary'] in text['text']] for text in test]
-len(doubles)
-
-
-
+# %% DESCRIPTIVE STATS FOR ABSTRACTIVE SUBSET
+df_abs = pd.read_json('gpu_files/abs_sums.json')
+df_abs['doubles'] = [x[0] in x[1] for x in zip(df_abs['summary'], df_abs['text'])]
+doubles = df_abs[df_abs['doubles'] == True]
+uniqs = df_abs[df_abs['doubles'] == False]
 
 # %%
-test['text']
-# %%
-from re import search
-doubles = [summary for summary in test['sum'] if search(summary, test['text'])]
-len(doubles)
+print(len(uniqs)) # 287110
+print(len(doubles)) # 95
 
+# %% INSPECT DOUBLES
+pd.set_option('display.max_colwidth', None) # show full entry
+doubles.sample(5) # look at the doubles
+#^^ OBS: most doubles are only ONE word summaries!!!???
+
+# %% REMOVE THESE 
+doubles
+
+# %% MAKE REF SUMMARY TITLE + SUMMARY?
+df_abs.sample(10)
+
+
+# %% ------ DESCRIPTIVE STATS & DIAGNOSTICS FOR ALL ABSTRACTIVE SUMMARIES
+
+
+# %% tokenize
+from transformers import BertTokenizerFast, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("google/mt5-small")
+tokenizerB = BertTokenizerFast.from_pretrained("Maltehb/danish-bert-botxo")
