@@ -22,7 +22,10 @@ d = train_res.flatten() # puts it into a list???
 d[0]
 
 # %% PREDS
-
+print("with fp16:")
+train_res = np.load('data/mt517-144342_1k_preds.npy', allow_pickle = True)
+d = train_res.flatten() # puts it into a list???
+d[2]
 
 
 # %% Abstractive mt5 test results

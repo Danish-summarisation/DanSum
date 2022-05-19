@@ -6,4 +6,7 @@ nltk
 sentencepiece
 lemmy
 spacy
+pandas
+numpy
+protobuf
 # pip install -r /path/to/requirements.txt
