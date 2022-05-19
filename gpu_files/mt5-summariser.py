@@ -16,16 +16,17 @@ import time
 ################################ Setup stuff ################################
 start = time.time()
 timestr = time.strftime("%d-%H%M%S")
-timestr = timestr + "_all_abs"
+timestr = timestr + "_sara"
 nltk.download('punkt')
-model_checkpoint = "google/mt5-small" # specify model
+#model_checkpoint = "google/mt5-small" # specify model
+model_checkpoint = "sarakolding/daT5-base"
 metric = datasets.load_metric("rouge")
 
 ################################ Load data ################################
 # 1k
-train = Dataset.from_pandas(pd.read_csv("train1k.csv", usecols=['text','summary'])) # training data
-test = Dataset.from_pandas(pd.read_csv("test1k.csv", usecols=['text','summary'])) # test data
-val = Dataset.from_pandas(pd.read_csv("val1k.csv", usecols=['text','summary'])) # validation data
+train = Dataset.from_pandas(pd.read_csv("train50k.csv", usecols=['text','summary'])) # training data
+test = Dataset.from_pandas(pd.read_csv("test50k.csv", usecols=['text','summary'])) # test data
+val = Dataset.from_pandas(pd.read_csv("val50k.csv", usecols=['text','summary'])) # validation data
 
 #train = Dataset.from_pandas(pd.read_csv("train_abs.csv", usecols=['text','summary'])) # training data
 #test = Dataset.from_pandas(pd.read_csv("test_abs.csv", usecols=['text','summary'])) # test data
@@ -39,14 +40,12 @@ dd = datasets.DatasetDict({"train":train,"validation":val,"test":test})
 # @ USE DANISH TOKENISER?!
 
 #tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
-#tokenizer2 = T5TokenizerFast.from_pretrained(model_checkpoint)
-from transformers import BertTokenizerFast
-tokenizer = BertTokenizerFast.from_pretrained("Maltehb/danish-bert-botxo")
+tokenizer = T5TokenizerFast.from_pretrained(model_checkpoint)
 
 
 # add prefix
-#prefix = "summarize: "
-prefix = ""
+prefix = "summarize: "
+#prefix = ""
 #prefix = "opsummér: "
 
 # specify lengths
@@ -81,22 +80,22 @@ model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 batch_size = 4
 # specify training arguments
 args = Seq2SeqTrainingArguments(
-    output_dir = "./mt5" + timestr,
+    output_dir = "./sara" + timestr,
     evaluation_strategy = "steps",
     save_strategy = "steps",
     learning_rate=5e-5,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
     #weight_decay=0.01,
-    logging_steps=2000,  # set to 2000 for full training #(maybe set to 10k???) #(default 500?)
-    save_steps=10000,  # set to 500 for full training
-    eval_steps=10000,  # set to 7500 for full training #(defaults to logging_steps?)
+    logging_steps=500,  # #(maybe set to 10k???) #(default 500?)
+    save_steps=500,  # default = 500
+    eval_steps=100,  # (defaults to logging_steps?)
     #warmup_steps=3000,  # set to 3000 lsor full training
     save_total_limit=1,
     num_train_epochs=1,
     predict_with_generate=True,
     overwrite_output_dir= True,
-    fp16=True,
+    #fp16=True,
     #fp16_full_eval=True,
     load_best_model_at_end = True,
     metric_for_best_model='loss',
@@ -152,7 +151,7 @@ trainer.train()
 result=trainer.evaluate()
 
 from numpy import save
-save('./mt5' + timestr + '_train', result)  
+save('./sara' + timestr + '_train', result)  
 
 ################################ Testing ################################
 model.to('cuda')
@@ -189,8 +188,8 @@ rouge_output = metric.compute(predictions=pred_str, references=label_str)
 
 # save predictions and rouge scores on test set
 from numpy import save
-np.save('./mt5' + timestr + '_preds.npy', results)
-np.save('./mt5' + timestr + '_test.npy', rouge_output)
+np.save('./sara' + timestr + '_preds.npy', results)
+np.save('./sara' + timestr + '_test.npy', rouge_output)
 
 end = time.time()
 print("TIME SPENT:")

@@ -1,5 +1,7 @@
-# This script explores different aspects of the DaNewsroom dataset.
-# %%
+'''
+This script explores different aspects of the DaNewsroom dataset.
+'''
+# %% LOAD PACKAGES
 import random
 from unittest import case
 import numpy as np
@@ -9,42 +11,24 @@ from datasets import Dataset
 from sklearn.model_selection import train_test_split
 
 # %% LOAD DATA
-df = pd.read_json(path_or_buf = 'danewsroom/danewsroom.jsonl.gz', lines=True)
+# all data (1132734 pairs, extractive = 615769, abstractive = 287205, mixed = 229760)
+#df = pd.read_json(path_or_buf = 'danewsroom/danewsroom.jsonl.gz', lines=True)
 
+# abstractive data only (287205 pairs)
+df = pd.read_json('gpu_files/abs_sums.json') 
 
 # %% INSPECT DATA STRUCTURE
 print(type(df)) # pandas.core.frame.DataFrame
 print(len(df)) # 1132734
 print(df.keys())
-#Index(['url', 'archive', 'title', 'date', 'text', 'summary', 'density',
-# 'coverage', 'compression', 'compression_bin', 'coverage_bin','density_bin',
-# 'site', 'domain', 'text_len', 'valid'], dtype='object')
-
 print(df.shape) # (1132734, 16)
 print(df.head())
-print(df['density_bin'].value_counts()) #extractive = 615769, abstractive = 287205, mixed = 229760
-
-
+print(df['density_bin'].value_counts())
 print(df.info())
 
-# %% SUBSET ABSTRACTIVE SUMMARIES
-df_abs = df.loc[df['density_bin'] == 'abstractive']
-len(df_abs) # 287205
-
-# %% MAKE SMALL SUBSETS FOR TESTING MODEL SPEED
-df1000 = df_abs[:1000]
-df10000 = df_abs[:10000]
-
-df1000.to_json(r'abs1000.json')
-df10000.to_json(r'abs10000.json')
-
-# %% SAVE ABSTRACTIVE SUBSET
-df_abs.to_json(r'abs_sums.json')
-
-
-# %% INSPECT
+# %% INSPECT RANDOM ENTRY
 pd.set_option('display.max_colwidth', None) # show full entry
-print(df_abs.sample())
+print(df.sample())
 
 # %% CHECK DIFFERENT SITES
 
@@ -52,57 +36,50 @@ print(df_abs.sample())
 # see conventions
 # some of them might need title included in summary - some NOT?!
 
+# %% INSPECT COMPRESSION
+print(df['compression_bin'].value_counts())
 
+high = df.loc[df['compression_bin'] == 'high']
+medium = df.loc[df['compression_bin'] == 'medium']
+low = df.loc[df['compression_bin'] == 'low']
 
+# compression doesn't necces
 
-
-# %% COMPRESSION
-
-print(df_abs['compression_bin'].value_counts())
-
-high = df_abs.loc[df_abs['compression_bin'] == 'high']
-medium = df_abs.loc[df_abs['compression_bin'] == 'medium']
-low = df_abs.loc[df_abs['compression_bin'] == 'low']
-
-# %%
+# %% SAMPLE SUMMARIES OF DIFFERENT COMPRESSIONS
+print('--- HIGH:')
 print(high['summary'].sample(n=2))
+print('--- MEDIUM:')
 print(medium['summary'].sample(n=2))
+print('--- LOW:')
 print(low['summary'].sample(n=2))
 
-
-# %% DESCRIPTIVE STATS FOR ABSTRACTIVE SUBSET
-df_abs = pd.read_json('gpu_files/abs_sums.json')
-df_abs['doubles'] = [x[0] in x[1] for x in zip(df_abs['summary'], df_abs['text'])]
-doubles = df_abs[df_abs['doubles'] == True]
-uniqs = df_abs[df_abs['doubles'] == False]
-
 # %%
+
+
+# %% --- DESCRIPTIVE STATS FOR ABSTRACTIVE SUBSET
+df['doubles'] = [x[0] in x[1] for x in zip(df['summary'], df['text'])]
+doubles = df[df['doubles'] == True]
+uniqs = df[df['doubles'] == False]
+
+# %% CHECK
 print(len(uniqs)) # 287110
 print(len(doubles)) # 95
 
 # %% INSPECT DOUBLES
 pd.set_option('display.max_colwidth', None) # show full entry
-doubles.sample(5) # look at the doubles
+doubles['summary'].sample(5) # look at the doubles
 #^^ OBS: most doubles are only ONE word summaries!!!???
 
 # %% REMOVE THESE 
 doubles
 
 # %% MAKE REF SUMMARY TITLE + SUMMARY?
-df_abs.sample(10)
+
 
 
 # %% ------ DESCRIPTIVE STATS & DIAGNOSTICS FOR ALL ABSTRACTIVE SUMMARIES
-# Load data
-train = Dataset.from_pandas(pd.read_csv("gpu_files/train_abs.csv", usecols=['text','summary'])) # training data
-test = Dataset.from_pandas(pd.read_csv("gpu_files/test_abs.csv", usecols=['text','summary'])) # test data
-val = Dataset.from_pandas(pd.read_csv("gpu_files/val_abs.csv", usecols=['text','summary'])) # validation data
-
-dd = datasets.DatasetDict({"train":train,"validation":val,"test":test}) # make datasetdict format
-
-# %% all
 #all = Dataset.from_pandas(pd.read_json('gpu_files/abs_sums.json'), usecols=['text','summary'])
-all = Dataset.from_pandas(df_abs)
+all = Dataset.from_pandas(df)
 
 # %% remove everything except text and summary
 all2 = all.remove_columns(['url', 'archive', 'title', 'date', 'density', 'coverage', 'compression', 'compression_bin', 'coverage_bin', 'density_bin', 'site', 'domain', 'text_len', 'valid', 'doubles', '__index_level_0__'])
@@ -141,8 +118,6 @@ tok_all = all2.map(preprocess_function, batched=True)
 # %% INSPECT ALL TOKENIZED DATA...
 len(tok_all['labels'][0])
 len(tok_all['input_ids'][0])
-
-
 
 # %% look for doubles (??)
 tok_all['doubles'] = [x[0] in x[1] for x in zip(tok_all['summary'], tok_all['text'])]
