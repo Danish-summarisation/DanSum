@@ -35,147 +35,63 @@ prefix = "summarize: " # prefix
 
 df = pd.read_json('gpu_files/abs_sums.json')
 df_ds = Dataset.from_pandas(df) # make dataset format
-df_dd = datasets.DatasetDict({"data":df_ds})
+df_dd = datasets.DatasetDict({"data":df_ds}) # make dataset dict format
 
-# tokenized_datasets = dd.map(preprocess_function, batched=True)
-
-#1k subset
+#make 1k subset
 df1k = df[:1000]
 df1k_ds = Dataset.from_pandas(df1k)
 df1k_dd = datasets.DatasetDict({"data":df1k_ds})
 
-# %% remove everything except text and summary
-all = df_ds.remove_columns(['url', 'archive', 'title', 'date', 'density',
-'coverage', 'compression', 'compression_bin', 'coverage_bin',
-'density_bin', 'site', 'domain', 'text_len', 'valid', '__index_level_0__'])
+# %% ----- TOKENIZE USING FUNCTION AND MT5
+tokenizer = T5TokenizerFast.from_pretrained("google/mt5-small") # choose tokenizer
+#dd = df1k_dd #1k subset
+dd = df_dd # all data
 
-all1k = df1k_ds.remove_columns(['url', 'archive', 'title', 'date', 'density',
-'coverage', 'compression', 'compression_bin', 'coverage_bin',
-'density_bin', 'site', 'domain', 'text_len', 'valid', '__index_level_0__'])
-
-# %% TOKENIZE 1K SUBSET USING FUNCTION AND MT5
-tokenizer = T5TokenizerFast.from_pretrained("google/mt5-small")
-tok_1k = df1k_dd.map(preprocess_function, batched=True)
-
-
-# %%
-# turn back into dataset (not dict)
-tok_1k_ds = tok_1k['data']
-
-# IDA START HERE!:
-# LOOK AT tok_1k_ds['input_ids']
-# figure out the lengths (descriptive stats), nice plots, etc
-# remove the crazy short ones
-# input ids is the articles
-# labels is the ref summaries
+# %% tokenize chosen data
+tok_dd = dd.map(preprocess_function, batched=True) # TOKENIZE IT!
+tok_ds = tok_dd ['data'] # turn back into dataset (not dict)
 
 # %% add features to ds with the TOKENISED lengths of ref summary and text/article
-tok_text_len = [len(text) for text in tok_1k_ds['input_ids']]
-tok_1k_ds = tok_1k_ds.add_column("tok_text_len", tok_text_len)
-tok_sum_len = [len(summary) for summary in tok_1k_ds['labels']]
+tok_text_len = [len(text) for text in tok_ds['input_ids']] # input ids is the articles
+tok_1k_ds = tok_ds.add_column("tok_text_len", tok_text_len)
+tok_sum_len = [len(summary) for summary in tok_1k_ds['labels']] # labels is the ref summaries
 tok_1k_ds = tok_1k_ds.add_column("tok_sum_len", tok_sum_len)
 
 # %% check the stats
 print("min sum:")
-print(min((tok_1k_ds)['tok_sum_len']))
+print(min((tok_ds)['tok_sum_len']))
 print("max sum:")
-print(max((tok_1k_ds)['tok_sum_len']))
+print(max((tok_ds)['tok_sum_len']))
 print("min text:")
-print(min((tok_1k_ds)['tok_text_len']))
+print(min((tok_ds)['tok_text_len']))
 print("max text: ")
-print(max((tok_1k_ds)['tok_text_len']))
+print(max((tok_ds)['tok_text_len']))
 
 # %% Inspect short summaries
-sorted(tok_1k_ds['tok_sum_len'])
-sorted(tok_1k_ds['tok_text_len'])
+sorted(tok_ds['tok_sum_len'])
+sorted(tok_ds['tok_text_len'])
 
 # %% check out the shorties
 # filter based on text len:
-[[x[0], x[1], x[2], x[3], x[4], x[5]] for x in zip(tok_1k_ds['archive'], tok_1k_ds['text'], tok_1k_ds['tok_text_len'], tok_1k_ds['summary'], tok_1k_ds['tok_sum_len'], tok_1k_ds['title']) if x[2] < 50]
+[[x[0], x[1], x[2], x[3], x[4], x[5]] for x in zip(tok_ds['archive'], tok_ds['text'], tok_ds['tok_text_len'], tok_ds['summary'], tok_ds['tok_sum_len'], tok_ds['title']) if x[2] < 50]
 
 # filter based on sum len:
-[[x[0], x[1], x[2], x[3], x[4], x[5]] for x in zip(tok_1k_ds['archive'], tok_1k_ds['text'], tok_1k_ds['tok_text_len'], tok_1k_ds['summary'], tok_1k_ds['tok_sum_len'], tok_1k_ds['title']) if x[4] < 30]
+[[x[0], x[1], x[2], x[3], x[4], x[5]] for x in zip(tok_ds['archive'], tok_ds['text'], tok_ds['tok_text_len'], tok_ds['summary'], tok_ds['tok_sum_len'], tok_ds['title']) if x[4] < 30]
 
 # %% count the shorties
-len([i for i in tok_1k_ds['tok_sum_len'] if i < 30])
+len([i for i in tok_ds['tok_sum_len'] if i < 30])
 
 # %%
 # decide lower cutoff bounds for tokenized summary and text length:
 sum_cut = 20
 text_cut = 50
 
-[i for i in tok_1k_ds['tok_sum_len'] if i < sum_cut]
+[i for i in tok_ds['tok_sum_len'] if i < sum_cut]
 
 
 
-# %% --- TOKENIZE 1k SUBSET WITH MT5
-tokenizer_mt5 = T5TokenizerFast.from_pretrained("google/mt5-small")
-inputs = [prefix + doc for doc in all1k["text"]] # articles (+ prefix)
-model_inputs_mt5_1k = tokenizer_mt5(inputs, truncation=True)
-with tokenizer_mt5.as_target_tokenizer():
-        labels = tokenizer_mt5(all1k["summary"], truncation=True) # tokenized summaries
-# getting IDs for token
-model_inputs_mt5_1k["labels"] = labels["input_ids"]
 
-# %% --- DO THINGS TO TOKENIZED SUBSET :D
-mod_in = model_inputs_mt5_1k # specify the tokenized model input
-
-#len(mod_in) # 3
-#mod_in['labels']
-#mod_in['input_ids']
-
-# %% ----- TOKENIZE ALL USING MT5
-tokenizer_mt5 = T5TokenizerFast.from_pretrained("google/mt5-small")
-inputs = [prefix + doc for doc in all["text"]] # articles (+ prefix)
-model_inputs_mt5_all = tokenizer_mt5(inputs, truncation=True)
-with tokenizer_mt5.as_target_tokenizer():
-        labels = tokenizer_mt5(all["summary"], truncation=True) # tokenized summaries
-# getting IDs for token
-model_inputs_mt5_all["labels"] = labels["input_ids"]
-
-# %%----- TOKENIZE 1k SUBSET WITH daT5
-tokenizer_dat5 = T5TokenizerFast.from_pretrained("sarakolding/daT5-base")
-inputs = [prefix + doc for doc in all1k["text"]] # articles (+ prefix)
-model_inputs_dat5 = tokenizer_dat5(inputs, truncation=True)
-
-with tokenizer_dat5.as_target_tokenizer():
-        labels = tokenizer_dat5(all1k["summary"], truncation=True) # tokenized summaries
-    
-# getting IDs for token
-model_inputs_dat5["labels"] = labels["input_ids"]
-
-
-
-# %% ----- Actually tokenize ALL
-inputs = [prefix + doc for doc in all["text"]] # summarries (+ prefix)
-model_inputs = tokenizer(inputs, truncation=True)
-
-with tokenizer.as_target_tokenizer():
-        labels = tokenizer(all["summary"], truncation=True) 
-    
-# getting IDs for token
-model_inputs["labels"] = labels["input_ids"]
-
-
-
-# %% TOKENIZE ON DATADICT SOMETHING SOMETHING
-# mt5 tokenizer (fast) version
-tokenizer = T5TokenizerFast.from_pretrained("google/mt5-base")
-tok_dd = dd.map(preprocess_function, batched=True)
-
-# %% tokenize all data (not split into sets...)
-tokenizer = T5TokenizerFast.from_pretrained("google/mt5-base")
-tok_all = all2.map(preprocess_function, batched=True)
-
-
-# %% INSPECT ALL TOKENIZED DATA...
-len(tok_all['labels'][0])
-len(tok_all['input_ids'][0])
-
-# %% look for doubles (??)
-tok_all['doubles'] = [x[0] in x[1] for x in zip(tok_all['summary'], tok_all['text'])]
-doubles = tok_all[tok_all['doubles'] == True]
-uniqs = tok_all[tok_all['doubles'] == False]
+# %% ----------------------- OLDER STUFF BELOW
 
 # %% CHECK IF IT MAKES SENSE TO INCLUDE TITLE FOR DIFFERENT SITES
 # look at dif sites
