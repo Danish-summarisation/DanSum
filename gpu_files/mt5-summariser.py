@@ -14,12 +14,13 @@ import time
 
 
 ################################ Setup stuff ################################
+model_checkpoint = "google/mt5-small"
+model_name = 'mt5-small'
+machine_type = 'cuda'
 start = time.time()
 timestr = time.strftime("%d-%H%M%S")
-timestr = timestr + "_sara"
+timestr = timestr + "_" + model_name
 nltk.download('punkt')
-#model_checkpoint = "google/mt5-small" # specify model
-model_checkpoint = "sarakolding/daT5-base"
 metric = datasets.load_metric("rouge")
 
 ################################ Load data ################################
@@ -78,9 +79,9 @@ tokenized_datasets = dd.map(preprocess_function, batched=True)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 # set batch size (nr of examples per step)
 batch_size = 4
-# specify training arguments
+# specify trainiqng arguments
 args = Seq2SeqTrainingArguments(
-    output_dir = "./sara" + timestr,
+    output_dir = "./" + model_name + timestr,
     evaluation_strategy = "steps",
     save_strategy = "steps",
     learning_rate=5e-5,
@@ -89,13 +90,13 @@ args = Seq2SeqTrainingArguments(
     #weight_decay=0.01,
     logging_steps=500,  # #(maybe set to 10k???) #(default 500?)
     save_steps=500,  # default = 500
-    eval_steps=100,  # (defaults to logging_steps?)
+    eval_steps=500,  # (defaults to logging_steps?)
     #warmup_steps=3000,  # set to 3000 lsor full training
     save_total_limit=1,
     num_train_epochs=1,
     predict_with_generate=True,
     overwrite_output_dir= True,
-    #fp16=True,
+    fp16=True,
     #fp16_full_eval=True,
     load_best_model_at_end = True,
     metric_for_best_model='loss',
@@ -151,10 +152,10 @@ trainer.train()
 result=trainer.evaluate()
 
 from numpy import save
-save('./sara' + timestr + '_train', result)  
+save('./' + model_name + timestr + '_train', result)  
 
 ################################ Testing ################################
-model.to('cuda')
+model.to(machine_type)
 # look at test set
 test_data = dd['test']
 
@@ -164,8 +165,8 @@ def generate_summary(batch):
     # prepare test data
     batch['text'] = [prefix + doc for doc in batch["text"]]
     inputs = tokenizer(batch["text"], padding="max_length", truncation=True, max_length=max_input_length, return_tensors="pt")
-    input_ids = inputs.input_ids.to("cuda")
-    attention_mask = inputs.attention_mask.to("cuda")
+    input_ids = inputs.input_ids.to(machine_type)
+    attention_mask = inputs.attention_mask.to(machine_type)
 
     # make the model generate predictions (summaries) for articles in text set
     outputs = model.generate(input_ids, attention_mask=attention_mask)
@@ -188,8 +189,8 @@ rouge_output = metric.compute(predictions=pred_str, references=label_str)
 
 # save predictions and rouge scores on test set
 from numpy import save
-np.save('./sara' + timestr + '_preds.npy', results)
-np.save('./sara' + timestr + '_test.npy', rouge_output)
+np.save('./' + model_name + timestr + '_preds.npy', results)
+np.save('./' + model_name + timestr + '_test.npy', rouge_output)
 
 end = time.time()
 print("TIME SPENT:")
