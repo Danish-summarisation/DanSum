@@ -7,6 +7,24 @@ import pandas as pd
 import datasets
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
+from datasets import load_dataset
+
+# %% --- MAKE SUBSETS FROM CLEANED DATA
+ds = load_dataset('csv', data_files='/work/69831/tok_ds_clean.csv')
+
+# --- IDA: PICK UP HERE!
+# - make 50k subset of cleaned data
+# - save train test and val CSV for 50k clean
+# - save train test and val CSV for all clean
+
+
+#df = pd.DataFrame(ds) # pandas dataframe version
+
+#df_abs = pd.read_json('gpu_files/abs_sums.json') # load all abs data (287205 pairs)
+#df50k = df_abs[:50000] # make the subset
+#abs50kds = Dataset.from_pandas(df50k) # make dataset format
+
+
 
 # %% ------- MAKE 50K SUBSET:
 df_abs = pd.read_json('gpu_files/abs_sums.json') # load all abs data (287205 pairs)

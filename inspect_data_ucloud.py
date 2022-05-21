@@ -229,7 +229,7 @@ tok_ds_clean = Dataset.from_pandas(tok_df_clean)
 # length is 230012 after cleaning (with 15, 128, 150, 1500)
 
 # %% save it
-tok_ds_clean.to_csv('tok_ds_clean.csv')
+#tok_ds_clean.to_csv('tok_ds_clean.csv')
 
 
 # %% manually inspect content from certain sites
