@@ -1,0 +1,98 @@
+---
+title: "plot_data"
+output: html_document
+date: '2022-05-23'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# LIBRARIES
+```{r}
+library(tidyverse) ; library(ggplot2)
+
+
+
+```
+
+# LOAD DATA
+```{r}
+unclean_all <- read.csv('tok_ds_all.csv')
+clean_all <- read.csv('tok_ds_clean.csv')
+#unclean_25k <- read.csv('')
+#clean_25k <- read.csv('')
+```
+
+
+# PLOTS
+
+Histograms
+```{r}
+# Tokenised text and sum lengths
+ggplot(unclean_all, aes(x=tok_sum_len)) +
+  geom_histogram()
+
+
+# unclean all
+ggplot(unclean_all, aes(tok_sum_len)) +
+  geom_histogram(bins=60,color = "#000000", fill = "#0099F8") +
+  labs(
+    title = "Unclean all tok_sum_len",
+    subtitle = "Made by Ida",
+    caption = "Source: DaNewsroom blabla",
+    x = "Tok sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "#0099F8", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10, face = "bold"),
+    plot.caption = element_text(face = "italic")
+  )
+
+# clean all
+ggplot(clean_all, aes(tok_sum_len)) +
+  geom_histogram(bins=60,color = "#000000", fill = "#0099F8") +
+  labs(
+    title = "Clean all tok_sum_len",
+    subtitle = "Made by Ida",
+    caption = "Source: DaNewsroom blabla",
+    x = "Tok sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "#0099F8", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10, face = "bold"),
+    plot.caption = element_text(face = "italic")
+  )
+
+
+
+ggplot(clean_all, aes(x=tok_sum_len)) +
+  geom_histogram()
+
+
+ggplot(unclean_all, aes(x=tok_text_len)) +
+  geom_histogram()
+
+ggplot(clean_all, aes(x=tok_text_len)) +
+  geom_histogram()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
