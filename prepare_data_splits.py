@@ -9,24 +9,36 @@ from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from datasets import load_dataset
 
-# %% --- MAKE SUBSETS FROM CLEANED DATA
-ds = load_dataset('csv', data_files='/work/69831/tok_ds_clean.csv')
+# %% MAKE 50K SUBSET FROM CLEANED DATA
+ds_clean = load_dataset('csv', data_files='/work/69831/tok_ds_clean.csv')
+df_clean = pd.DataFrame(ds) # pandas dataframe version
+df50k_clean = df_clean[:50000] # make 50k clean subset
+ds50k_clean = Dataset.from_pandas(df50k_clean) # make dataset format
 
-# --- IDA: PICK UP HERE!
-# - make 50k subset of cleaned data
-# - save train test and val CSV for 50k clean
-# - save train test and val CSV for all clean
+# %% make 50k clean train test val splits
+train50k_clean, test50k_clean = ds50k_clean.train_test_split(test_size=5000).values() # 5000 = absolute size specified (out of 50k)
+train50k_clean, val50k_clean = train50k_clean.train_test_split(test_size=5000).values()
 
+# %% save train test and val CSV for 50k clean
+train50k_clean.to_csv("data/train50k_clean.csv")
+test50k_clean.to_csv("data/test50k_clean.csv")
+val50k_clean.to_csv("data/val50k_clean.csv")
 
-#df = pd.DataFrame(ds) # pandas dataframe version
+# %% make splits for ALL clean
+len(ds_clean) # test
+test_len = len(ds_clean) / 10 # 10 % for the test set (and also val)
 
-#df_abs = pd.read_json('gpu_files/abs_sums.json') # load all abs data (287205 pairs)
-#df50k = df_abs[:50000] # make the subset
-#abs50kds = Dataset.from_pandas(df50k) # make dataset format
+train_clean, test_clean = ds_clean.train_test_split(test_size=test_len).values() # 5000 = absolute size specified (out of 50k)
+train_clean, val_clean = train_clean.train_test_split(test_size=test_len).values()
 
+# %% save split csvs for ALL clean
+train_clean.to_csv("data/train_clean.csv")
+test_clean.to_csv("data/test_clean.csv")
+val_clean.to_csv("data/val_clean.csv")
 
+# --- @IDA: RUN UNTIL HERE, SAVE FILES, DOUBLE CHECK SIZE
 
-# %% ------- MAKE 50K SUBSET:
+# %% ------- MAKE 50K SUBSET (OF UNCLEANED DATA):
 df_abs = pd.read_json('gpu_files/abs_sums.json') # load all abs data (287205 pairs)
 df50k = df_abs[:50000] # make the subset
 abs50kds = Dataset.from_pandas(df50k) # make dataset format
