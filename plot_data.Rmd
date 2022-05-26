@@ -10,80 +10,423 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # LIBRARIES
 ```{r}
-library(tidyverse) ; library(ggplot2)
-
-
-
+library(tidyverse) ; library(ggplot2) ; library(patchwork)
 ```
 
 # LOAD DATA
 ```{r}
+#full <- read.csv('C:/Users/idaba/danewsroom.csv') # full DaNewsroom
 unclean_all <- read.csv('tok_ds_all.csv')
 clean_all <- read.csv('tok_ds_clean.csv')
 #unclean_25k <- read.csv('')
 #clean_25k <- read.csv('')
 ```
 
-
-# PLOTS
-
-Histograms
+Tidying data for plotting
 ```{r}
-# Tokenised text and sum lengths
-ggplot(unclean_all, aes(x=tok_sum_len)) +
-  geom_histogram()
+clean_all[ , c('Unnamed..0.1', 'X__index_level_0__')] <- list(NULL) # remove unwanted columns
+```
 
+Combine data (hmm double check this works)
+```{r}
+#Now, combine your two dataframes into one.  First make a new column in each.
+clean_all$type <- 'clean'
+unclean_all$type <- 'unclean'
+# combine the two data frames etapa1 and etapa2
+combo <- rbind(clean_all, unclean_all)
+```
 
-# unclean all
-ggplot(unclean_all, aes(tok_sum_len)) +
-  geom_histogram(bins=60,color = "#000000", fill = "#0099F8") +
+Custom colours
+```{r}
+blue = "#86C2FF"
+red = "#FF8686"
+green = "#86FFAA"
+```
+
+# --- THESE ARE THE FINAL PLOTS USED IN THE PAPER ---
+
+Histograms - tokenised text and summary lengths before and after cleaning
+```{r}
+# tok sum len
+p1 <- ggplot(combo, aes(x=tok_sum_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
   labs(
-    title = "Unclean all tok_sum_len",
-    subtitle = "Made by Ida",
-    caption = "Source: DaNewsroom blabla",
-    x = "Tok sum len",
+    title = "Tokenised summary length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised summary length",
     y = "Count"
   ) +
   theme_classic() +
   theme(
-    plot.title = element_text(color = "#0099F8", size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 10, face = "bold"),
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
     plot.caption = element_text(face = "italic")
   )
 
-# clean all
-ggplot(clean_all, aes(tok_sum_len)) +
-  geom_histogram(bins=60,color = "#000000", fill = "#0099F8") +
+# tok text len
+p2 <- ggplot(combo, aes(x=tok_text_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
   labs(
-    title = "Clean all tok_sum_len",
-    subtitle = "Made by Ida",
-    caption = "Source: DaNewsroom blabla",
-    x = "Tok sum len",
+    title = "Tokenised text length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised text length",
     y = "Count"
   ) +
   theme_classic() +
   theme(
-    plot.title = element_text(color = "#0099F8", size = 16, face = "bold"),
-    plot.subtitle = element_text(size = 10, face = "bold"),
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
     plot.caption = element_text(face = "italic")
   )
 
+p1 + p2
 
+# density distribution histogram of before and after cleaning
+ggplot(combo, aes(x=density, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
+  labs(
+    title = "Summary density distribution",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Density",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+```
 
-ggplot(clean_all, aes(x=tok_sum_len)) +
-  geom_histogram()
+Boxplots (NOPE, DON'T INCLUDE...)
+```{r}
+# tok sum len
+p1 <- ggplot(combo, aes(x=tok_sum_len, fill = type)) +
+  geom_boxplot(color = "black", alpha=0.5) +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
+  labs(
+    title = "Tokenised summary length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
 
+# tok text len
+p2 <- ggplot(combo, aes(x=tok_text_len, fill = type)) +
+  geom_boxplot(color = "black", alpha=0.5) +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
+  labs(
+    title = "Tokenised text length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised text length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
 
-ggplot(unclean_all, aes(x=tok_text_len)) +
-  geom_histogram()
-
-ggplot(clean_all, aes(x=tok_text_len)) +
-  geom_histogram()
-
+p1 + p2
 
 ```
 
 
+
+
+# -----
+
+
+
+# PLOTS
+Make annotations for plots
+```{r}
+anno_clean <- data.frame(
+  x_sum = c(round(min(clean_all$tok_sum_len), 2), round(mean(clean_all$tok_sum_len), 2), round(max(clean_all$tok_sum_len), 2)),
+  x_txt = c(round(min(clean_all$tok_text_len), 2), round(mean(clean_all$tok_text_len), 2), round(max(clean_all$tok_text_len), 2)),
+  y = c(1000, 37000, 100), # y position (change)
+  label = c("Min:", "Mean:", "Max:")
+) 
+
+ggplot(clean_all, aes(x=tok_sum_len)) +
+  geom_histogram(color = "black", alpha=0.5) +
+  geom_text(data = anno_clean, aes(x = x_sum, y = y, label = paste(label, x_sum)), size = 4, fontface = "bold")
+
+
+ggplot(clean_all, aes(x=tok_text_len)) +
+  geom_histogram(color = "black", alpha=0.5) +
+  geom_text(data = anno_clean, aes(x = x_txt, y = y, label = paste(label, x_sum)), size = 4, fontface = "bold")
+```
+
+Descriptive
+```{r}
+#density hist
+ggplot(combo, aes(x=density, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity")
+
+# tok sum len
+ggplot(combo, aes(x=tok_sum_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity")
+
+# tok text len
+ggplot(combo, aes(x=tok_text_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity")
+
+```
+
+
+BOXPLOTS
+```{r}
+ggplot(combo, aes(x=type, y=tok_sum_len, fill=type)) +
+  geom_boxplot()
+
+ggplot(clean_all, aes(x=type, y=tok_sum_len)) +
+  geom_boxplot()
+
+ggplot(unclean_all, aes(x=type, y=tok_sum_len)) +
+  geom_boxplot() +
+  geom_jitter()
+
+# checking nr of outliers
+length(unclean_all[unclean_all$tok_sum_len > 128,])
+length(clean_all[clean_all$tok_sum_len > 128,])
+
+
+ggplot(combo, aes(x=type, y=tok_text_len)) +
+  geom_boxplot()
+
+ggplot(combo, aes(x=type, y=tok_text_len)) +
+  geom_boxplot()
+
+
+# scatter - we keep the ones in the tiny red box hehe hmmm
+ggplot(unclean_all, aes(x=tok_text_len, y=tok_sum_len)) +
+  geom_point(alpha=0.2) +
+  geom_hline(yintercept=15, color=red) +
+  geom_hline(yintercept=128, color=red) +
+  geom_vline(xintercept = 150, color=red) +
+  geom_vline(xintercept=1500, color=red)
+
+
+ggplot(clean_all, aes(x=tok_text_len, y=tok_sum_len)) +
+  geom_point(alpha=0.5)
+
+# VIOLIN
+ggplot(combo, aes(fill=type, x=type, y=tok_sum_len)) + 
+  geom_violin() +
+  geom_point()
+
+ggplot(combo, aes(fill=type, x=type, y=tok_text_len)) + 
+    geom_violin()
+
+ggplot(clean_all, aes(x=type, y=tok_text_len)) + 
+    geom_violin()
+
+ggplot(clean_all, aes(x=type, y=tok_text_len)) + 
+    geom_boxplot()
+
+ggplot(clean_all, aes(x=type, y=tok_sum_len)) + 
+    geom_violin()
+ 
+
+ggplot(combo, aes(x=type,y=Sepal.Length)) +
+  geom_violin()
+
++
+  geom_jitter(height = 0, width = 0.1) +
+  geom_text(data=Summary.data ,aes(x = Species, y = avg, label=n),color="red", fontface =2, size = 5)
+
+```
+
+
+
+Histograms
+```{r}
+# SUMMARIES
+
+# unclean all
+p1 <- ggplot(unclean_all, aes(tok_sum_len)) +
+  geom_histogram(bins=60, color = "black", fill = red) +
+  labs(
+    title = "Tokenised summary length",
+    subtitle = "Uncleaned data",
+    caption = "Source: DaNewsroom",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  ) +
+  xlim(0, 400)
+
+# clean all
+p2 <- ggplot(clean_all, aes(tok_sum_len)) +
+  geom_histogram(bins=60, color = "black", fill = blue) +
+  labs(
+    title = "Cleaned: Tokenised summary length",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  ) +
+  xlim(0, 400)
+
+
+# ARTICLES
+
+# unclean all texts
+p3 <- ggplot(unclean_all, aes(tok_text_len)) +
+  geom_histogram(bins=60, color = "black", fill = red) +
+  labs(
+    title = "Uncleaned: Tokenised article length",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Tokenised article length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  ) +
+  xlim(0, 40000)
+
+# clean all texts
+p4 <- ggplot(clean_all, aes(tok_text_len)) +
+  geom_histogram(bins=60, color = "black", fill = blue) +
+  labs(
+    title = "Cleaned: Tokenised article length",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Tokenised article length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  ) +
+  xlim(0, 40000)
+
+#plot in grid
+p1 + p2 + p3 + p4
+```
+
+Boxplots
+```{r}
+# SUMMARIES
+
+# unclean all
+p1 <- ggplot(unclean_all, aes(tok_sum_len)) +
+  geom_violin(color = "black", fill = red) +
+  labs(
+    title = "Unclean all tok_sum_len",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Tok sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  )
+
+# clean all
+p2 <- ggplot(clean_all, aes(tok_sum_len)) +
+  geom_violin(color = "black", fill = blue) +
+  labs(
+    title = "Clean all tok_sum_len",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Tok sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  )
+
+p1+p2
+
+
+# ARTICLES
+
+# unclean all texts
+p3 <- ggplot(unclean_all, aes(tok_text_len)) +
+  geom_histogram(bins=60, color = "black", fill = red) +
+  labs(
+    title = "Unclean all text_sum_len",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Text sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  )
+
+# clean all texts
+p4 <- ggplot(clean_all, aes(tok_text_len)) +
+  geom_histogram(bins=60, color = "black", fill = blue) +
+  labs(
+    title = "Clean all text_sum_len",
+    subtitle = "Subtitle here",
+    caption = "Source: DaNewsroom",
+    x = "Text sum len",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.caption = element_text(face = "italic")
+  )
+
+#plot in grid
+p1 + p2 + p3 + p4
+
+
+```
+
+Violin plots?
+```{r}
+
+
+
+```
 
 
 
