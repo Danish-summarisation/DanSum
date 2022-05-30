@@ -1,0 +1,17 @@
+torch
+datasets 
+rouge-score
+bert_score 
+nltk
+sentencepiece
+lemmy
+spacy
+pandas
+numpy
+protobuf
+datasets
+wandb
+accelerate
+sklearn
+git+https://github.com/sarakolding/transformers
+git+https://github.com/danielvarab/da-newsroom
