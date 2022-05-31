@@ -1,7 +1,7 @@
 <div id="top"></div>
 <div align="center">
     <img src="data/DALL·E 2022-05-31 16.23.40.png" alt="Logo" width="80" height="80">
-<h3 align="center">Automatic Abstractive Summarisation in Danish</h3>
+<h2 align="center">Automatic Abstractive Summarisation in Danish</h3>
 
   <p align="center">
     Data Science Exam - MSc Cognitive Science at Aarhus University - Spring 2022
