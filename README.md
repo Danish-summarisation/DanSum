@@ -27,14 +27,14 @@ We fine-tune a pruned mT5 model on a cleaned subset of the DaNewsroom dataset co
 
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
-* Install required modules
-  ```sh
-  pip install -r requirements.txt
-  ```
 * Clone the repo
    ```sh
    git clone https://github.com/idabh/data-science-exam
    ```
+* Install required modules
+  ```sh
+  pip install -r requirements.txt
+  ```
 
 ## Contact
 Ida Bang Hansen - idabanghansen@gmail.com
