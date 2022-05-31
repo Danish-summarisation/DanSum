@@ -1,0 +1,238 @@
+---
+title: "plot_data"
+output: html_document
+date: '2022-05-23'
+---
+
+This R script includes the code for creating plots used in the data science exam paper by Sara Kolding and Ida Bang Hansen, May 2022.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# LIBRARIES
+```{r}
+library(tidyverse) ; library(ggplot2) ; library(patchwork) ; library(formattable)
+```
+
+# LOAD DATA
+```{r}
+unclean_all <- read.csv('tok_ds_all.csv') # before cleaning
+clean_all <- read.csv('tok_ds_clean.csv') # after cleaning
+```
+
+# DATA PREPROCESSING
+```{r}
+# remove unwanted columns
+clean_all[ , c('Unnamed..0.1', 'X__index_level_0__')] <- list(NULL)
+
+# combine into one dataframe
+clean_all$type <- 'clean'
+unclean_all$type <- 'raw'
+combo <- rbind(clean_all, unclean_all)
+```
+
+# DESCRIPTIVE STATS
+```{r}
+# get descriptive summary statistics on unclean and clean data
+stats <- combo %>%
+  group_by(type) %>%
+  summarise(
+    "Min text length" = min(tok_text_len),
+    "Mean text length" = round(mean(tok_text_len), 2),
+    "Max text length" = max(tok_text_len),
+    "Min summary length" = min(tok_sum_len),
+    "Mean summary length" = round(mean(tok_sum_len), 2),
+    "Max summary length" = max(tok_sum_len)
+  )
+
+# format table
+formattable(stats,
+            align = c("l", "c", "c", "c", "c", "c", "c")
+  )
+```
+
+Custom colours
+```{r}
+blue = "#86C2FF"
+red = "#FF8686"
+green = "#6DDE9A"
+yellow = "#F2D968"
+```
+
+# PLOTS FOR PAPER
+
+Histograms - tokenised text and summary lengths before and after cleaning
+```{r}
+# tokenised summary length
+# clean
+p2 <- ggplot(clean_all, aes(x=tok_sum_len)) +
+  geom_histogram(bins=50,color = "black", alpha=0.5, position = "identity", fill = "blue") +
+  labs(
+    title = "Tokenised summary length",
+    subtitle = "Clean data",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+# unclean
+p1 <- ggplot(unclean_all, aes(x=tok_sum_len)) +
+  geom_histogram(bins=50,color = "black", alpha=0.5, position = "identity", fill = red) +
+  labs(
+    title = "Tokenised summary length",
+    subtitle = "Raw data",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+p1 + p2
+
+# both
+ggplot(combo, aes(x=tok_sum_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
+  labs(
+    title = "Tokenised summary length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised summary length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+# tokenised text length
+
+# raw
+p3 <- ggplot(unclean_all, aes(x=tok_text_len)) +
+  geom_histogram(bins=50,color = "black", alpha=0.5, position = "identity", fill = red) +
+  labs(
+    title = "Tokenised article length",
+    subtitle = "Raw data",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised article length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+# clean
+p4 <- ggplot(clean_all, aes(x=tok_text_len)) +
+  geom_histogram(bins=50,color = "black", alpha=0.5, position = "identity", fill = "blue") +
+  labs(
+    title = "Tokenised article length",
+    subtitle = "Clean data",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised article length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+p3 + p4
+
+# both
+ggplot(combo, aes(x=tok_text_len, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'unclean' = red)) +
+  labs(
+    title = "Tokenised text length",
+    subtitle = "Before and after cleaning",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Tokenised text length",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+
+# density distribution histogram of before and after cleaning
+ggplot(combo, aes(x=density, fill = type)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity") +
+  scale_fill_manual(values = c('clean' = "blue", 'raw' = red)) +
+  labs(
+    title = "Summary density distribution",
+    subtitle = "Before and after cleaning by token length",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Density",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 14),
+    plot.caption = element_text(face = "italic")
+  )
+```
+
+Density distribution of generated summaries
+```{r}
+# daT5
+da_den <- read.csv('density_daT5_preds.csv') # before cleaning
+da_den$density <- da_den$X0
+
+ggplot(da_den, aes(x = density)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity", fill = green) +
+  labs(
+    title = "Density of generated daT5 summaries",
+    subtitle = "On 23,001 test set articles",
+    caption = "Source: DaNewsroom (our abstractive subset)",
+    x = "Density",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    plot.caption = element_text(face = "italic")
+  )
+
+# mT5-abstractive
+mt_den <- read.csv('density_mT5_preds.csv') # before cleaning
+mt_den$density <- mt_den$X0
+
+ggplot(mt_den, aes(x = density)) +
+  geom_histogram(color = "black", alpha=0.5, position = "identity", fill = yellow) +
+  labs(
+    title = "Density of generated mT5-abstractive summaries",
+    subtitle = "On 20,000 test set articles",
+    caption = "Source: DaNewsroom (old 100k abstractive subset from our previous work)",
+    x = "Density",
+    y = "Count"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(color = "black", size = 18, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    plot.caption = element_text(face = "italic")
+  )
+```
