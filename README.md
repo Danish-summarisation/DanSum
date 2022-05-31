@@ -14,7 +14,9 @@
 
 ## About The Project
 
-This repository contains the code for the project of creating an automatic abstractive summariser in Danish. We fine-tuned an mT5 model on an abstractive subset of the DaNewsroom dataset.
+This repository contains the code for creating an automatic abstractive summarisation tool in Danish. We fine-tuned an target language-specific mT5 model on an abstractive subset of the DaNewsroom dataset.
+
+The model can be used for summarisation of individual, novel news articles using generate_summary.ipynb, or through the [huggingface API](https://huggingface.co/sarakolding/daT5-summariser).
 
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
