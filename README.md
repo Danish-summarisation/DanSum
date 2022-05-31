@@ -1,5 +1,6 @@
 <div id="top"></div>
-
+<div align="center">
+    <img src="data/DALL·E 2022-05-31 16.23.40.png" alt="Logo" width="80" height="80">
 <h3 align="center">Automatic Abstractive Summarisation in Danish</h3>
 
   <p align="center">
@@ -40,3 +41,6 @@ We fine-tune a pruned mT5 model on a cleaned subset of the DaNewsroom dataset co
 Ida Bang Hansen - idabanghansen@gmail.com
 <br />
 Sara Kolding - sarakolding@live.dk
+
+## Acknowledgments
+* Picture
