@@ -9,17 +9,12 @@
   <br />
     <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
     <br />
-    ·
   </p>
 </div>
 
-
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
-SOMETHING ABOUT THE PROJECT
-
-<p align="right">(<a href="#top">back to top</a>)</p>
+This repository contains the code for the project of creating an automatic abstractive summariser in Danish. We fine-tuned an mT5 model on an abstractive subset of the DaNewsroom dataset.
 
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
@@ -32,17 +27,7 @@ SOMETHING ABOUT THE PROJECT
    git clone https://github.com/idabh/data-science-exam
    ```
 
-### Overview of scripts?
-* something
-* something more
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 ## Contact
-
-Sara Kolding - sarakolding@live.dk
-<br />
 Ida Bang Hansen - idabanghansen@gmail.com
-
-<p align="right">(<a href="#top">back to top</a>)</p>
+<br />
+Sara Kolding - sarakolding@live.dk
