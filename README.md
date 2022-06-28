@@ -6,7 +6,7 @@
   <p align="center">
     Data Science Exam - MSc Cognitive Science at Aarhus University - Spring 2022
   <br />
-  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a> & <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a></em>
+  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a> & <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em>
   <br />
     <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
     <br />
@@ -25,6 +25,18 @@ We fine-tune a pruned mT5 model on a cleaned subset of the DaNewsroom dataset co
 <br>
 ***Key words:** automatic summarisation, transformers, Danish, natural language processing*
 
+### Model performance
+These are the quantitative results (mean F1 scores) of our model-generated summaries:
+
+| Metric  | Result |
+| ------------- | ------------- |
+| **BERTScore**  | 71.41  |
+| **ROUGE-1**  | 23.10 |
+| **ROUGE-2**   | 7.53  |
+| **ROUGE-L**   | 18.52 |
+
+
+
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
 * Clone the repo
@@ -40,7 +52,10 @@ We fine-tune a pruned mT5 model on a cleaned subset of the DaNewsroom dataset co
 Ida Bang Hansen - idabanghansen@gmail.com
 <br />
 Sara Kolding - sarakolding@live.dk
+<br />
+Katrine Nymann - katrinesofienm@hotmail.dk
 
 ## Acknowledgments
 * Thank you to Daniel Varab for providing us with access to DaNewsroom
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
+'
