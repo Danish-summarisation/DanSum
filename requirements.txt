@@ -1,17 +1,25 @@
 torch
-datasets 
-rouge-score
-bert_score 
-nltk
-sentencepiece
-lemmy
-spacy
-pandas
 numpy
 protobuf
-datasets
-wandb
+
+# preprocessing
+sentencepiece
+nltk
+lemmy
+
+# training
+git+https://github.com/sarakolding/transformers
 accelerate
 sklearn
-git+https://github.com/sarakolding/transformers
+
+# data
+datasets 
+pandas
 git+https://github.com/danielvarab/da-newsroom
+
+# evaluation
+rouge-score
+bert_score 
+
+# logging
+wandb
