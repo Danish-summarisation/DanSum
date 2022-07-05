@@ -5,11 +5,9 @@ protobuf
 # preprocessing
 sentencepiece
 nltk
-lemmy
 
 # training
 git+https://github.com/sarakolding/transformers
-accelerate
 sklearn
 
 # data
