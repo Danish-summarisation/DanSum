@@ -1,0 +1,92 @@
+
+<wandb.sdk.wandb_run.Run object at 0x000001F2583220A0>
+  File "<stdin>", line 1
+    dd = datasets.DatasetDict({"train": train, "validation": val}] #, "test": test})
+                                                                 ^
+SyntaxError: closing parenthesis ']' does not match opening parenthesis '('
+C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\convert_slow_tokenizer.py:434: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
+  warnings.warn(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+100%|████████████████████████████████████████████████████████████████████████████████| 23/23 [00:59<00:00,  2.60s/ba]
+100%|██████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  1.04ba/s]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'DatasetDict' object has no attribute 'val'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\datasets\dataset_dict.py", line 50, in __getitem__
+    return super().__getitem__(k)
+KeyError: 'val'
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'DatasetDict' object has no attribute 'validation'
+Dataset({
+    features: ['text', 'summary'],
+    num_rows: 250
+})
+{'text': "Det begyndte med en romantisk middag og rigeligt med rødvin. Så tilbød John Travolta en privat massage, og efter en hed nat blev den nu 62-årige pilot Doug Gotterba og Grease-stjernen kærester.\n\nForholdet har været holdt hemmeligt i 30 år, men nu fortæller manden, der dengang arbejdede som Travoltas private pilot, hvordan de to mænd i årevis tog på ferier og spiste middage sammen i skjul.\n\n- John betragtede mig som sin kæreste, og bag lukkede døre kyssede han mig og sagde: Jeg elsker dig, Doug, fortæller skuespillerens tidligere medarbejder ifølge Se og Hør.\n\nSamtidig var Travolta kærester med skuespillerkollegaen Brooke Shields - men to forhold var slet ikke nok for den 27-årige stjerne, der dengang var på toppen af sin karriere.\n\n- John var umættelig, og jeg vidste, at han havde mange andre elskere ved siden af. Nogle af dem havde jeg hørt om, andre fortalte han mig selv om, husker piloten.\n\nFoto: Ups! Se utro stjerners skamfulde SEX-kapader\n\nForholdet sluttede i 1986, fordi John Travoltas fantasier om at prøve en trekant og filme parrets lagengymastik blev for meget for hans elsker.\n\nDoug Goterba er i øvrigt ikke den eneste, der hævder at være hoppet i kanen med kendissen. Travolta har for tiden flere sexchikanesager hængende over hovedet, fordi blandt andet tidligere massører har følt sig krænket af Hollywood-stjernen.\n\nInteresserer du dig for nyheder om job og arbejdsliv, så prøv Avisen.dk's nyhedsbrev!\n\nDu kan naturligvis altid framelde dig igen, og vi deler ikke din mail med andre.", 'summary': 'I seks år var de to mænd kærester - mens John Travolta udadtil dannede par med en kvinde.'}
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'tokenized_datasetes' is not defined
+{'text': "Det begyndte med en romantisk middag og rigeligt med rødvin. Så tilbød John Travolta en privat massage, og efter en hed nat blev den nu 62-årige pilot Doug Gotterba og Grease-stjernen kærester.\n\nForholdet har været holdt hemmeligt i 30 år, men nu fortæller manden, der dengang arbejdede som Travoltas private pilot, hvordan de to mænd i årevis tog på ferier og spiste middage sammen i skjul.\n\n- John betragtede mig som sin kæreste, og bag lukkede døre kyssede han mig og sagde: Jeg elsker dig, Doug, fortæller skuespillerens tidligere medarbejder ifølge Se og Hør.\n\nSamtidig var Travolta kærester med skuespillerkollegaen Brooke Shields - men to forhold var slet ikke nok for den 27-årige stjerne, der dengang var på toppen af sin karriere.\n\n- John var umættelig, og jeg vidste, at han havde mange andre elskere ved siden af. Nogle af dem havde jeg hørt om, andre fortalte han mig selv om, husker piloten.\n\nFoto: Ups! Se utro stjerners skamfulde SEX-kapader\n\nForholdet sluttede i 1986, fordi John Travoltas fantasier om at prøve en trekant og filme parrets lagengymastik blev for meget for hans elsker.\n\nDoug Goterba er i øvrigt ikke den eneste, der hævder at være hoppet i kanen med kendissen. Travolta har for tiden flere sexchikanesager hængende over hovedet, fordi blandt andet tidligere massører har følt sig krænket af Hollywood-stjernen.\n\nInteresserer du dig for nyheder om job og arbejdsliv, så prøv Avisen.dk's nyhedsbrev!\n\nDu kan naturligvis altid framelde dig igen, og vi deler ikke din mail med andre.", 'summary': 'I seks år var de to mænd kærester - mens John Travolta udadtil dannede par med en kvinde.', 'input_ids': [196098, 10701, 267, 1136, 81875, 185300, 499, 289, 81197, 314, 68205, 373, 259, 21536, 3075, 499, 52544, 5279, 260, 259, 9628, 46449, 64438, 4040, 7414, 47355, 289, 11144, 13961, 261, 373, 3052, 289, 259, 12818, 294, 270, 259, 6694, 530, 703, 8950, 264, 59694, 265, 18147, 132302, 42438, 140655, 373, 9578, 8339, 264, 98403, 272, 85575, 39572, 260, 1102, 63604, 588, 2570, 270, 259, 50380, 259, 136648, 3075, 259, 266, 733, 2659, 261, 692, 703, 259, 57404, 295, 259, 90691, 261, 442, 847, 318, 34297, 368, 512, 7414, 47355, 263, 9983, 18147, 261, 382, 12735, 269, 288, 259, 58338, 259, 266, 2659, 265, 2058, 27882, 482, 33666, 286, 373, 259, 263, 72060, 68205, 265, 9714, 259, 266, 61762, 454, 260, 259, 264, 4040, 259, 101316, 346, 368, 4524, 512, 1349, 408, 164625, 261, 373, 7334, 259, 68694, 368, 331, 51605, 121022, 263, 4859, 1444, 4524, 373, 16669, 368, 267, 4376, 259, 70065, 3163, 261, 132302, 261, 259, 57404, 295, 259, 177175, 2272, 4051, 12613, 123451, 259, 266, 4891, 746, 373, 447, 13475, 260, 4111, 11385, 567, 7414, 47355, 85575, 39572, 499, 259, 177175, 144338, 278, 61815, 265, 97012, 263, 259, 264, 692, 288, 259, 15092, 567, 259, 78636, 1165, 12775, 332, 530, 68088, 59694, 265, 153646, 261, 442, 847, 318, 567, 482, 259, 60895, 643, 1349, 152688, 260, 259, 264, 4040, 567, 673, 197929, 1717, 261, 373, 1732, 300, 52741, 261, 344, 1444, 8780, 368, 4864, 4869, 259, 70065, 265, 1793, 11181, 643, 260, 653, 11669, 643, 710, 8780, 368, 1732, 31181, 270, 542, 261, 4869, 57023, 346, 1444, 4524, 3768, 542, 261, 382, 126596, 18147, 278, 260, 3898, 267, 5246, 263, 309, 746, 259, 98417, 259, 190772, 186845, 77030, 265, 124674, 264, 61465, 1229, 1102, 63604, 259, 69414, 368, 259, 266, 20541, 261, 259, 23005, 4040, 7414, 47355, 263, 96920, 295, 542, 344, 43660, 289, 2721, 19290, 373, 15227, 624, 41179, 283, 104224, 55417, 2846, 259, 6694, 332, 1202, 429, 332, 12162, 259, 70065, 260, 132302, 39391, 140655, 453, 259, 266, 259, 28460, 51926, 1165, 530, 259, 41306, 261, 442, 28466, 379, 1229, 344, 2570, 39860, 429, 259, 266, 620, 278, 499, 8954, 17596, 260, 7414, 47355, 588, 332, 259, 12108, 4681, 265, 1528, 172801, 405, 63793, 259, 40931, 1853, 910, 21868, 429, 261, 259, 23005, 9614, 270, 259, 31449, 4051, 12613, 26555, 46041, 588, 26071, 270, 2002, 2064, 182634, 270, 643, 30670, 264, 98403, 272, 260, 84477, 20953, 413, 3163, 332, 259, 184394, 542, 8185, 373, 35554, 12663, 261, 1033, 109744, 259, 54015, 278, 260, 285, 314, 277, 263, 259, 165810, 136550, 309, 1231, 620, 8827, 1717, 2058, 2304, 525, 1058, 95575, 3163, 14147, 261, 373, 625, 426, 295, 1165, 779, 14945, 499, 4869, 260, 1], 'attention_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 'labels': [336, 9855, 2659, 567, 269, 288, 259, 58338, 85575, 39572, 259, 264, 9665, 4040, 7414, 47355, 259, 179885, 4936, 469, 78570, 624, 499, 289, 42982, 260, 1]}
+[]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<string>", line 101, in __init__
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\training_args.py", line 999, in __post_init__
+    raise ValueError(
+ValueError: Mixed precision training with AMP or APEX (`--fp16` or `--bf16`) and half precision evaluation (`--fp16_full_eval` or `--bf16_full_eval`) can only be used on CUDA devices.
+The following columns in the training set don't have a corresponding argument in `MT5ForConditionalGeneration.forward` and have been ignored: summary, text. If summary, text are not expected by `MT5ForConditionalGeneration.forward`,  you can safely ignore this message.
+C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 22250
+  Num Epochs = 1
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 8
+  Gradient Accumulation steps = 1
+  Total optimization steps = 2782
+Automatic Weights & Biases logging enabled, to disable set os.environ["WANDB_DISABLED"] = "true"
+  0%|                                                                                       | 0/2782 [00:00<?, ?it/s]C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\modeling_utils.py:699: FutureWarning: The `device` argument is deprecated and will be removed in v5 of Transformers.
+  warnings.warn(
+C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\modeling_utils.py:656: FutureWarning: The `device` argument is deprecated and will be removed in v5 of Transformers.
+  warnings.warn(
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\trainer.py", line 1321, in train
+    return inner_training_loop(
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\trainer.py", line 1563, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\trainer.py", line 2217, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\trainer.py", line 2249, in compute_loss
+    outputs = model(**inputs)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\transformers\models\t5\modeling_t5.py", line 1676, in forward
+    lm_logits = self.lm_head(sequence_output)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\sarak\.conda\envs\nlp\lib\site-packages\torch\nn\modules\linear.py", line 103, in forward
+    return F.linear(input, self.weight, self.bias)

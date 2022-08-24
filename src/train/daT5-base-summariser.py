@@ -17,13 +17,13 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    T5TokenizerFast,
+    T5Tokenizer,
 )
 
 ################################ Setup ################################
-model_checkpoint = "sarakolding/daT5-base"
-model_name = "daT5-base-summariser"
-machine_type = "gpu"
+model_checkpoint = "google/mt5-small"
+model_name = "mt5-small-25k-baseline"
+machine_type = "cpu"
 start = time.time()
 timestr = time.strftime("%d-%H%M%S")
 timestr = timestr + "_" + model_name
@@ -33,23 +33,24 @@ metric = datasets.load_metric("rouge")
 wandb.init(project="summarisation", entity="idasara")
 wandb.run.name = timestr
 ################################ Load data ################################
-# ALL with 89-10-1 split
+# 25 k subset with 89-(10)-1 split
 train = Dataset.from_pandas(
-    pd.read_csv("train_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("data/train25k_clean1.csv", usecols=["text", "summary"])
 )  # training data
-test = Dataset.from_pandas(
-    pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
-)  # test data
+# test = Dataset.from_pandas(
+#     pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
+# )  # test data
 val = Dataset.from_pandas(
-    pd.read_csv("val_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("data/val25k_clean1.csv", usecols=["text", "summary"])
 )  # validation data
 
 # make into datasetdict format
-dd = datasets.DatasetDict({"train": train, "validation": val, "test": test})
+dd = datasets.DatasetDict({"train": train, "validation": val}) #, "test": test})
 
 ################################ Preprocessing ################################
 
-tokenizer = T5TokenizerFast.from_pretrained(model_checkpoint)
+# removed fast because of warning message
+tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
 
 # add prefix
 prefix = "summarize: "
@@ -109,15 +110,15 @@ args = Seq2SeqTrainingArguments(
     lr_scheduler_type="constant",
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
-    logging_steps=2500,
-    save_steps=5000,
-    eval_steps=5000,
-    warmup_steps=2500,
+    logging_steps=300,
+    save_steps=600,
+    eval_steps=600,
+    warmup_steps=300,
     save_total_limit=1,
     num_train_epochs=1,
     predict_with_generate=True,
     overwrite_output_dir=True,
-    fp16=True,
+    #fp16=True,
     load_best_model_at_end=True,
     metric_for_best_model="loss",
 )
