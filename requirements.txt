@@ -21,3 +21,6 @@ bert_score==0.3.11
 
 # logging
 wandb==0.12.16
+
+# hyperparameter search
+ray[tune] 

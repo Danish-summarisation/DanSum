@@ -1,5 +1,5 @@
 """
-This script contains the code for finetuning a pretrained mT5 model for summarisation on the DaNewsroom dataset.
+This script contains the code for hyperparameter search for a mT5 model for summarisation on the DaNewsroom dataset.
 """
 
 ################################ Importing modules ################################
@@ -80,22 +80,12 @@ def preprocess_function(examples):
 # make the tokenized datasets using the preprocess function
 tokenized_datasets = dd.map(preprocess_function, batched=True)
 
-################################ Fine-tuning ################################
+################################ Hyperparameter search ################################
 
-# load the pretrained mT5 model from the Huggingface hub
-model = AutoModelForSeq2SeqLM.from_pretrained(
-    model_checkpoint,
-    min_length=15,
-    max_length=128,
-    num_beams=4,
-    no_repeat_ngram_size=3,
-    length_penalty=5,
-    early_stopping=True,
-    dropout_rate=0.01,
-)
+def model_init():
+    return AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 
-# log progress using wandb
-wandb.watch(model, log_freq=100)
+#wandb.watch(model_init, log_freq=100)
 
 # set batch size (nr of examples per step)
 batch_size = 8
@@ -122,7 +112,7 @@ args = Seq2SeqTrainingArguments(
 )
 
 # pad the articles and ref summaries (with -100) to max input length
-data_collator = DataCollatorForSeq2Seq(tokenizer, model=model, pad_to_multiple_of=8)
+data_collator = DataCollatorForSeq2Seq(tokenizer, model=model_init, pad_to_multiple_of=8)
 
 
 def compute_metrics(eval_pred):
@@ -160,63 +150,50 @@ def compute_metrics(eval_pred):
 
 # make the model trainer
 trainer = Seq2SeqTrainer(
-    model,
-    args,
+    model_init=model_init,
+    args=args,
     train_dataset=tokenized_datasets["train"],
     eval_dataset=tokenized_datasets["validation"],
     data_collator=data_collator,
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics,
-    model_init=model_init
+    compute_metrics=compute_metrics
 )
 
-# train the model!
-trainer.train()
+def my_hp_space_ray(trial):
+    from ray import tune
 
-################################ Testing ################################
-model.to(machine_type)
-# OBS! Change back to test
-test_data = dd["validation"]
+    return {
+        "learning_rate": tune.linear(5e-4, 5e-6),
+        "lr_scheduler_type": tune.categorical('constant', 'linear'),
+        "num_train_epochs": tune.choice(range(1, 10)),
+        # "seed": tune.choice(range(1, 41)), 
+        "per_device_train_batch_size": tune.choice([4, 8, 16, 32, 64]),
+    }
 
+# dataset density threshold, continuous [1.5-8]
+# learning rate scheduler categorical [constant, linear decay, ...]
+# warm-up steps [10%]
+# fp16: True
+# gradient clipping, num_beam, min_length, max_length, dropout rate: find suitable values in literature.
 
-def generate_summary(batch):
-    # prepare test data
-    batch["text"] = [prefix + doc for doc in batch["text"]]
-    inputs = tokenizer(
-        batch["text"],
-        padding="max_length",
-        return_tensors="pt",
-        max_length=max_input_length,
-        truncation=True,
-    )
-    input_ids = inputs.input_ids.to(machine_type)
-    attention_mask = inputs.attention_mask.to(machine_type)
+# Default objective is the sum of all metrics
+# when metrics are provided, so we have to maximize it.
+best_run = trainer.hyperparameter_search(
+    direction="maximize", 
+    backend="ray", 
+    n_trials=10, # number of trials
+    # Choose among many libraries:
+    # https://docs.ray.io/en/latest/tune/api_docs/suggestion.html
+    search_alg=HyperOptSearch(metric="objective", mode="max"),
+    # Choose among schedulers:
+    # https://docs.ray.io/en/latest/tune/api_docs/schedulers.html
+    scheduler=ASHAScheduler(metric="objective", mode="max"),
+    hp_space=my_hp_space_ray
+)
 
-    # make the model generate predictions (summaries) for articles in text set
-    outputs = model.generate(input_ids, attention_mask=attention_mask)
+best_run
 
-    # all special tokens will be removed
-    output_str = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+# for n, v in best_run.hyperparameters.items():
+#     setattr(trainer.args, n, v)
 
-    batch["pred"] = output_str
-
-    return batch
-
-
-# generate summaries for test set with the function
-results = test_data.map(generate_summary, batched=True, batch_size=batch_size)
-
-pred_str = results["pred"]  # the model's generated summary
-label_str = results["summary"]  # actual ref summary from test set
-
-# compute rouge scores
-rouge_output = metric.compute(predictions=pred_str, references=label_str)
-
-# save predictions and rouge scores on test set
-
-np.save("./" + timestr + "_preds.npy", results)
-np.save("./" + timestr + "_rouge.npy", rouge_output)
-
-end = time.time()
-print("TIME SPENT:")
-print(end - start)
+# trainer.train()
