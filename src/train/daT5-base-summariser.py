@@ -85,8 +85,8 @@ tokenized_datasets = dd.map(preprocess_function, batched=True)
 # load the pretrained mT5 model from the Huggingface hub
 model = AutoModelForSeq2SeqLM.from_pretrained(
     model_checkpoint,
-    min_length=15,
-    max_length=128,
+    min_length=15, # OBS: change
+    max_length=128, # OBS: change
     num_beams=4,
     no_repeat_ngram_size=3,
     length_penalty=5,

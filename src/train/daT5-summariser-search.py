@@ -10,6 +10,7 @@ import wandb
 import time
 import datasets
 from datasets import Dataset
+from ray import tune
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
@@ -88,22 +89,17 @@ def model_init():
 #wandb.watch(model_init, log_freq=100)
 
 # set batch size (nr of examples per step)
-batch_size = 8
+# batch_size = 8
 # specify trainiqng arguments
 args = Seq2SeqTrainingArguments(
     output_dir="./" + timestr,
     evaluation_strategy="steps",
     save_strategy="steps",
-    learning_rate=5e-5,
-    lr_scheduler_type="constant",
-    per_device_train_batch_size=batch_size,
-    per_device_eval_batch_size=batch_size,
     logging_steps=100,
     save_steps=200,
     eval_steps=200,
     warmup_steps=100,
     save_total_limit=1,
-    num_train_epochs=1,
     predict_with_generate=True,
     overwrite_output_dir=True,
     fp16=True,
@@ -160,21 +156,22 @@ trainer = Seq2SeqTrainer(
 )
 
 def my_hp_space_ray(trial):
-    from ray import tune
-
     return {
         "learning_rate": tune.linear(5e-4, 5e-6),
-        "lr_scheduler_type": tune.categorical('constant', 'linear'),
+        "lr_scheduler_type": tune.categorical('constant', 'linear'), # more
         "num_train_epochs": tune.choice(range(1, 10)),
         # "seed": tune.choice(range(1, 41)), 
         "per_device_train_batch_size": tune.choice([4, 8, 16, 32, 64]),
+        "num_beams": tune.choice(range(4, 6)), # or without range?
+        "no_repeat_ngram_size": tune.choice(range(2, 5)),
+        "length_penalty": tune.choice(range(4, 10)),
+        "early_stopping": tune.categorical('True'),
+        "dropout_rate": tune.linear(0.15, 0.3),
+        "max_grad_norm": tune.choice(range(5, 10)) # discrete? no 1?
     }
 
 # dataset density threshold, continuous [1.5-8]
-# learning rate scheduler categorical [constant, linear decay, ...]
 # warm-up steps [10%]
-# fp16: True
-# gradient clipping, num_beam, min_length, max_length, dropout rate: find suitable values in literature.
 
 # Default objective is the sum of all metrics
 # when metrics are provided, so we have to maximize it.
