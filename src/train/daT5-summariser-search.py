@@ -11,6 +11,7 @@ import time
 import datasets
 from datasets import Dataset
 from ray import tune
+# from evaluation import Fragments # does not work
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
@@ -27,7 +28,8 @@ start = time.time()
 timestr = time.strftime("%d-%H%M%S")
 timestr = timestr + "_" + model_name
 nltk.download("punkt")
-metric = datasets.load_metric("rouge")
+rouge_metric = datasets.load_metric("rouge")
+bert_metric = datasets.load_metric("bertscore")
 
 wandb.init(project="summarisation", entity="idasara")
 wandb.run.name = timestr
@@ -129,8 +131,25 @@ def compute_metrics(eval_pred):
     ]
 
     # compute ROUGE scores
-    result = metric.compute(predictions=decoded_preds, references=decoded_labels)
+    result = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels)
     result = {key: value.mid.fmeasure for key, value in result.items()}
+
+    # compute BERTScores
+    bertscores = bert_metric.compute(predictions=decoded_preds, references=decoded_labels, lang="da")
+    result['bertscore'] = np.mean(bertscores['precision'])
+
+    # compute moverscore - not working yet
+    # from moverscore_v2 import get_idf_dict, word_mover_score 
+
+    # idf_dict_hyp = get_idf_dict(dec) # idf_dict_hyp = defaultdict(lambda: 1.)
+    # idf_dict_ref = get_idf_dict(references) # idf_dict_ref = defaultdict(lambda: 1.)
+
+    # scores = word_mover_score(references, translations, idf_dict_ref, idf_dict_hyp, \
+    #                       stop_words=[], n_gram=1, remove_subwords=True)
+
+    # compute density - not working yet
+    # fragments = [Fragments(n[0], n[1], lang="da") for n in zip(decoded_preds, texts)]
+    # densities = [n.density() for n in fragments]
 
     # add mean generated length
     prediction_lens = [
