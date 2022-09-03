@@ -11,6 +11,7 @@ from transformers import BertTokenizerFast, T5TokenizerFast
 from transformers import AutoTokenizer
 import seaborn
 import numpy as np
+import matplotlib.pyplot as plt
 
 def preprocess_function(examples):
     # concatenate prefix and article into one input
@@ -36,16 +37,15 @@ ds_abstractive = ds["train"]
 df_abstractive = pd.DataFrame(ds_abstractive)
 df_abstractive = df_abstractive[df_abstractive.density <= 1.5] 
 print(len(df_abstractive)) # 287205
-df_abstractive.to_csv("df_abstractive.csv")  # save csv
+df_abstractive.to_csv("data/df_abstractive.csv")  # save csv
 # Keep a raw subset of 25k? ?? But how when stuff is removed
 # maybe not needed since we will only train on the cleaned data right?
 
 # %% Clean by filter token article/summary length cutoffs
-df_abstractive = pd.read_csv('df_abstractive.csv')
+df_abstractive = pd.read_csv('data/df_abstractive.csv')
 
 # %% Convert data format
-#make 1k subset
-df1k = df_abstractive[:25000]
+df1k = df_abstractive[:25000] # remove subset when finished
 df1k_ds = Dataset.from_pandas(df1k)
 df1k_dd = datasets.DatasetDict({"data":df1k_ds})
 
@@ -75,20 +75,32 @@ print(max((tok_ds)['tok_text_len']))
 
 # %% Make plot with summary length and text length to define cutoffs
 # histogram of summary token length
-seaborn.histplot(tok_ds['tok_sum_len'], color = "red")
-sum_mean = np.mean(tok_ds['tok_sum_len'])
-sum_sd = np.std(tok_ds['tok_sum_len'])
-# used to remove lengths less or more than two standard deviations from the mean 
-min_sum_len = sum_mean - 2*sum_sd #but this becomes negative though...
-max_sum_len = sum_mean + 2*sum_sd
+graph = seaborn.histplot(tok_ds['tok_sum_len'], color = "red")
+min_sum_len = np.quantile(tok_ds['tok_sum_len'], 0.02)
+max_sum_len = np.quantile(tok_ds['tok_sum_len'], 0.98)
+graph.axvline(min_sum_len)
+graph.axvline(max_sum_len)
+graph.set_xlabel('Number of tokens')
+graph.set_title('Number of tokens in summaries')
+graph.text(200, 1000, f'Lower cutoff: {round(min_sum_len, 1)}')
+graph.text(200, 900, f'Upper cutoff: {round(max_sum_len, 1)}')
+plt.savefig('sum_tokens_hist.png')
+plt.show()
+
 
 # %% histogram of text token length
-seaborn.histplot(tok_ds['tok_text_len'], color = "green")
-sum_mean = np.mean(tok_ds['tok_text_len'])
-sum_sd = np.std(tok_ds['tok_text_len'])
-# Defining cutoffs
-min_text_len = sum_mean-2*sum_sd # becomes negative though...
-max_text_len = sum_mean+2*sum_sd
+graph = seaborn.histplot(tok_ds['tok_text_len'], color = "red")
+min_text_len = np.quantile(tok_ds['tok_text_len'], 0.02)
+max_text_len = np.quantile(tok_ds['tok_text_len'], 0.98)
+graph.axvline(min_text_len)
+graph.axvline(max_text_len)
+graph.set_xlabel('Number of tokens')
+graph.set_title('Number of tokens in article texts')
+graph.text(30000, 800, f'Lower cutoff: {round(min_text_len, 1)}')
+graph.text(30000, 700, f'Upper cutoff: {round(max_text_len, 1)}')
+plt.savefig('text_tokens_hist.png')
+plt.show()
+
 
 # %% Filtering based on cutoffs
 tok_df = pd.DataFrame(tok_ds) # pandas dataframe version
@@ -106,14 +118,24 @@ tok_ds_clean = Dataset.from_pandas(tok_df_clean)
 # length should be 230012 after cleaning (with 15, 128, 150, 1500)
 
 # %% Plot the newly cut data summary lengths
-seaborn.histplot(tok_df_clean['tok_sum_len'], color = "green")
+graph = seaborn.histplot(tok_df_clean['tok_sum_len'], color = "green")
+graph.set_xlabel('Number of tokens')
+graph.set_title('Number of tokens in filtered summaries')
+plt.savefig('sum_tokens_cleaned.png')
+plt.show()
 
 # %% Plot the newly cut data text lengths
-seaborn.histplot(tok_df_clean['tok_text_len'], color = "green")
+graph = seaborn.histplot(tok_df_clean['tok_text_len'], color = "green")
+graph.set_xlabel('Number of tokens')
+graph.set_title('Number of tokens in filtered article texts')
+plt.savefig('text_tokens_cleaned.png')
+plt.show()
 
 # %% save it
-tok_ds_clean.to_csv('tok_ds_clean.csv')
+tok_ds_clean.to_csv('data/tok_ds_clean.csv')
 # Went from 25k to 23425
+# Now only 20837 with 90% of data cutoffs
+# 96% return 23172
 
 #### Not used
 #### Pipeline for other dataset e.g. Danews
