@@ -12,7 +12,7 @@ import datasets
 from datasets import Dataset
 from ray import tune
 # from evaluation import Fragments # does not work
-# import function from train script
+from daT5-base-summariser import (preprocess_function, compute_metrics)
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
