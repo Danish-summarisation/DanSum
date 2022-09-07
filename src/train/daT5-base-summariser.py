@@ -2,7 +2,7 @@
 This script contains the code for finetuning a pretrained mT5 model for summarisation on the DaNewsroom dataset.
 """
 
-################################ Importing modules ################################
+# Importing modules
 import nltk
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ from transformers import (
     T5Tokenizer,
 )
 
-################################ Setup ################################
+# Setup
 model_checkpoint = "google/mt5-small"
 model_name = "mt5-small-25k-baseline"
 machine_type = "cuda"
@@ -26,27 +26,27 @@ start = time.time()
 timestr = time.strftime("%d-%H%M%S")
 timestr = timestr + "_" + model_name
 nltk.download("punkt")
-metric = datasets.load_metric("rouge")
+rouge_metric = datasets.load_metric("rouge")
+bert_metric = datasets.load_metric("bertscore")
 
 wandb.init(project="summarisation", entity="idasara")
 wandb.run.name = timestr
-################################ Load data ################################
-# 25 k subset with 89-(10)-1 split
+
+# Load data
 train = Dataset.from_pandas(
     pd.read_csv("train1k.csv", usecols=["text", "summary"])
 )  # training data
-# test = Dataset.from_pandas(
-#     pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
-# )  # test data
+test = Dataset.from_pandas(
+    pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
+)  # test data
 val = Dataset.from_pandas(
     pd.read_csv("val25k_clean1.csv", usecols=["text", "summary"])
 )  # validation data
 
 # make into datasetdict format
-dd = datasets.DatasetDict({"train": train, "validation": val}) #, "test": test})
+dd = datasets.DatasetDict({"train": train, "validation": val, "test": test})
 
-################################ Preprocessing ################################
-
+# Preprocessing
 # removed fast because of warning message
 tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
 
@@ -80,13 +80,12 @@ def preprocess_function(examples):
 # make the tokenized datasets using the preprocess function
 tokenized_datasets = dd.map(preprocess_function, batched=True)
 
-################################ Fine-tuning ################################
-
+# Fine-tuning
 # load the pretrained mT5 model from the Huggingface hub
 model = AutoModelForSeq2SeqLM.from_pretrained(
     model_checkpoint,
-    min_length=15, # OBS: change
-    max_length=128, # OBS: change
+    min_length=15, 
+    max_length=128, 
     num_beams=4,
     no_repeat_ngram_size=3,
     length_penalty=5,
@@ -94,20 +93,17 @@ model = AutoModelForSeq2SeqLM.from_pretrained(
     dropout_rate=0.01,
 )
 
-# log progress using wandb
-wandb.watch(model, log_freq=100)
 
-# set batch size (nr of examples per step)
-batch_size = 8
-# specify trainiqng arguments
+
+# specify training arguments
 args = Seq2SeqTrainingArguments(
     output_dir="./" + timestr,
     evaluation_strategy="steps",
     save_strategy="steps",
     learning_rate=5e-5,
     lr_scheduler_type="constant",
-    per_device_train_batch_size=batch_size,
-    per_device_eval_batch_size=batch_size,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     logging_steps=100,
     save_steps=200,
     eval_steps=200,
@@ -143,8 +139,12 @@ def compute_metrics(eval_pred):
     ]
 
     # compute ROUGE scores
-    result = metric.compute(predictions=decoded_preds, references=decoded_labels)
+    result = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels)
     result = {key: value.mid.fmeasure for key, value in result.items()}
+
+    # compute BERTScores
+    bertscores = bert_metric.compute(predictions=decoded_preds, references=decoded_labels, lang="da")
+    result['bertscore'] = np.mean(bertscores['precision'])
 
     # add mean generated length
     prediction_lens = [
@@ -166,17 +166,15 @@ trainer = Seq2SeqTrainer(
     eval_dataset=tokenized_datasets["validation"],
     data_collator=data_collator,
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics,
-    model_init=model_init
+    compute_metrics=compute_metrics
 )
 
 # train the model!
 trainer.train()
 
-################################ Testing ################################
+# Testing
 model.to(machine_type)
-# OBS! Change back to test
-test_data = dd["validation"]
+test_data = dd["test"]
 
 
 def generate_summary(batch):
@@ -210,12 +208,13 @@ pred_str = results["pred"]  # the model's generated summary
 label_str = results["summary"]  # actual ref summary from test set
 
 # compute rouge scores
-rouge_output = metric.compute(predictions=pred_str, references=label_str)
+rouge_output = rouge_metric.compute(predictions=pred_str, references=label_str)
+bert_output = bert_metric.compute(predictions=pred_str, references=label_str, lang='da')
 
 # save predictions and rouge scores on test set
-
-np.save("./" + timestr + "_preds.npy", results)
-np.save("./" + timestr + "_rouge.npy", rouge_output)
+results.to_csv("./" + timestr + "_preds.csv")
+rouge_output.to_csv("./" + timestr + "_rouge.csv")
+bert_output.to_csv("./" + timestr + "_bert.csv")
 
 end = time.time()
 print("TIME SPENT:")
