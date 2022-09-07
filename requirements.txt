@@ -23,4 +23,4 @@ bert_score==0.3.11
 wandb==0.12.16
 
 # hyperparameter search
-ray[tune] 
+ray[tune]==2.0.0
