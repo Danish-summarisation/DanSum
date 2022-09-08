@@ -29,17 +29,17 @@ def preprocess_function(examples):
     return model_inputs
 
 # %% Load raw data
-ds = load_dataset("csv", data_files="../../../danewsroom.csv") # change path
+ds = load_dataset("csv", data_files="/data/danish_summarization_danewsroom/danewsroom.csv") # change path
 ds_train = ds["train"]
 
 # %% Filter by density
 df_abstractive = pd.DataFrame(ds_train)
 df_abstractive = df_abstractive[df_abstractive.density <= 1.5] 
 print(len(df_abstractive)) # 287205
-df_abstractive.to_csv("df_abstractive.csv")  # save csv
+df_abstractive.to_csv("/home/sarakolind/DanSum/df_abstractive.csv")  # save csv
 
 # %% Clean by filter token article/summary length cutoffs
-df_abstractive = pd.read_csv('df_abstractive.csv') # load csv
+df_abstractive = pd.read_csv('/home/sarakolind/DanSum/df_abstractive.csv') # load csv
 
 # %% Convert data format
 ds_abstractive = Dataset.from_pandas(df_abstractive)
@@ -69,7 +69,7 @@ graph.set_xlabel('Number of tokens')
 graph.set_title('Number of tokens in summaries')
 graph.text(200, 1000, f'Lower cutoff: {round(min_sum_len, 1)}')
 graph.text(200, 900, f'Upper cutoff: {round(max_sum_len, 1)}')
-plt.savefig('sum_tokens_hist.png')
+plt.savefig('/home/sarakolind/DanSum/sum_tokens_hist.png')
 plt.show()
 
 # %% histogram of text token length
@@ -82,7 +82,7 @@ graph.set_xlabel('Number of tokens')
 graph.set_title('Number of tokens in article texts')
 graph.text(30000, 800, f'Lower cutoff: {round(min_text_len, 1)}')
 graph.text(30000, 700, f'Upper cutoff: {round(max_text_len, 1)}')
-plt.savefig('text_tokens_hist.png')
+plt.savefig('/home/sarakolind/DanSum/text_tokens_hist.png')
 plt.show()
 
 # %% Filtering based on cutoffs
@@ -103,16 +103,16 @@ tok_ds_clean = Dataset.from_pandas(tok_df_clean)
 graph = seaborn.histplot(tok_df_clean['tok_sum_len'], color = "green")
 graph.set_xlabel('Number of tokens')
 graph.set_title('Number of tokens in filtered summaries')
-plt.savefig('sum_tokens_cleaned.png')
+plt.savefig('/home/sarakolind/DanSum/sum_tokens_cleaned.png')
 plt.show()
 
 # %% Plot the newly cut data text lengths
 graph = seaborn.histplot(tok_df_clean['tok_text_len'], color = "green")
 graph.set_xlabel('Number of tokens')
 graph.set_title('Number of tokens in filtered article texts')
-plt.savefig('text_tokens_cleaned.png')
+plt.savefig('/home/sarakolind/DanSum/text_tokens_cleaned.png')
 plt.show()
 
 # %% save it
-tok_ds_clean.to_csv('tok_ds_clean.csv')
+tok_ds_clean.to_csv('/data/danish_summarization_danewsroom/tok_ds_clean.csv')
 # %%
