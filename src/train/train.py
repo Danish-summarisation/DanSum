@@ -34,13 +34,13 @@ wandb.run.name = timestr
 
 # Load data
 train = Dataset.from_pandas(
-    pd.read_csv("train1k.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/train25k_clean.csv", usecols=["text", "summary"])
 )  # training data
 test = Dataset.from_pandas(
-    pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/test25k_clean.csv", usecols=["text", "summary"])
 )  # test data
 val = Dataset.from_pandas(
-    pd.read_csv("val25k_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/val25k_clean.csv", usecols=["text", "summary"])
 )  # validation data
 
 # make into datasetdict format
@@ -50,17 +50,13 @@ dd = datasets.DatasetDict({"train": train, "validation": val, "test": test})
 # removed fast because of warning message
 tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
 
-# add prefix
-prefix = "summarize: "
-
 # specify lengths
 max_input_length = 1024  # max text (article) max token length
 max_target_length = 128  # max reference summary max token length
 
 
 def preprocess_function(examples):
-    # concatenate prefix and article into one input
-    inputs = [prefix + doc for doc in examples["text"]]
+    inputs = [doc for doc in examples["text"]]
 
     # tokenize the input + truncate to max input length
     model_inputs = tokenizer(inputs, max_length=max_input_length, truncation=True)
@@ -97,7 +93,7 @@ model = AutoModelForSeq2SeqLM.from_pretrained(
 
 # specify training arguments
 args = Seq2SeqTrainingArguments(
-    output_dir="./" + timestr,
+    output_dir="home/sarakolind/" + timestr,
     evaluation_strategy="steps",
     save_strategy="steps",
     learning_rate=5e-5,
@@ -212,9 +208,9 @@ rouge_output = rouge_metric.compute(predictions=pred_str, references=label_str)
 bert_output = bert_metric.compute(predictions=pred_str, references=label_str, lang='da')
 
 # save predictions and rouge scores on test set
-results.to_csv("./" + timestr + "_preds.csv")
-rouge_output.to_csv("./" + timestr + "_rouge.csv")
-bert_output.to_csv("./" + timestr + "_bert.csv")
+results.to_csv("home/sarakolind/" + timestr + "_preds.csv")
+rouge_output.to_csv("home/sarakolind/" + timestr + "_rouge.csv")
+bert_output.to_csv("home/sarakolind/" + timestr + "_bert.csv")
 
 end = time.time()
 print("TIME SPENT:")

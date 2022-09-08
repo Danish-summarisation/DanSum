@@ -12,7 +12,7 @@ import datasets
 from datasets import Dataset
 from ray import tune
 # from evaluation import Fragments # does not work
-from daT5-base-summariser import (preprocess_function, compute_metrics)
+from train import (preprocess_function, compute_metrics)
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
@@ -23,7 +23,7 @@ from transformers import (
 
 # Setup
 model_checkpoint = "google/mt5-small"
-model_name = "mt5-small-25k-baseline"
+model_name = "mt5-small-25k-search"
 machine_type = "cuda"
 start = time.time()
 timestr = time.strftime("%d-%H%M%S")
@@ -37,13 +37,13 @@ wandb.run.name = timestr
 
 # Load data
 train = Dataset.from_pandas(
-    pd.read_csv("train1k.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/train25k_clean.csv", usecols=["text", "summary"])
 )  # training data
 test = Dataset.from_pandas(
-    pd.read_csv("test_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/test25k_clean.csv", usecols=["text", "summary"])
 )  # test data
 val = Dataset.from_pandas(
-    pd.read_csv("val25k_clean1.csv", usecols=["text", "summary"])
+    pd.read_csv("/data/danish_summarization_danewsroom/val25k_clean.csv", usecols=["text", "summary"])
 )  # validation data
 
 # make into datasetdict format
@@ -52,9 +52,6 @@ dd = datasets.DatasetDict({"train": train, "validation": val, "test": test})
 # Preprocessing
 # removed fast because of warning message
 tokenizer = T5Tokenizer.from_pretrained(model_checkpoint)
-
-# add prefix
-prefix = "summarize: "
 
 # specify lengths
 max_input_length = 1024  # max text (article) max token length
@@ -69,13 +66,13 @@ def model_init():
 
 # specify training arguments
 args = Seq2SeqTrainingArguments(
-    output_dir="./" + timestr,
+    output_dir="home/sarakolind/" + timestr,
     evaluation_strategy="steps",
     save_strategy="steps",
-    logging_steps=100,
-    save_steps=200,
-    eval_steps=200,
-    warmup_steps=100,
+    #logging_steps=100,
+    #save_steps=200,
+    #eval_steps=200,
+    #warmup_steps=100,
     save_total_limit=1,
     predict_with_generate=True,
     overwrite_output_dir=True,
