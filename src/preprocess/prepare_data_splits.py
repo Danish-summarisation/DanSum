@@ -35,7 +35,7 @@ val25k_clean.to_csv("data/val25k_clean.csv")
 
 # %% --- MAKE ALL CLEAN 89-10-1 SUBSET SPLIT
 test_len = round(len(ds_clean) / 10)  # test is 10%
-val_len = round(len(ds_clean) / 100)  # validation is 1%
+val_len = round(len(ds_clean) / 10)  # validation is 10%
 train_clean1, test_clean1 = ds_clean.train_test_split(
     test_size=test_len, seed=seed
 ).values()  # absolute size specified

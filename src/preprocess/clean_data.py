@@ -87,7 +87,6 @@ graph.text(200, 900, f'Upper cutoff: {round(max_sum_len, 1)}')
 plt.savefig('sum_tokens_hist.png')
 plt.show()
 
-
 # %% histogram of text token length
 graph = seaborn.histplot(tok_ds['tok_text_len'], color = "red")
 min_text_len = np.quantile(tok_ds['tok_text_len'], 0.02)
@@ -102,10 +101,49 @@ plt.savefig('text_tokens_hist.png')
 plt.show()
 
 
+# %% Check the edge cases qualitatively
+tok_df = pd.DataFrame(tok_ds) 
+# shortest summaries
+index = tok_df.loc[tok_df['tok_sum_len'] == 9]
+# The first here is a mistake and not a summary 
+index = index.loc[tok_df['Unnamed: 0'] != 109]
+index['summary'][10:30]
+index_ds = Dataset.from_pandas(index)
+print(index_ds['summary'][0:10])
+
+#%% shorter than 9
+tok_df = pd.DataFrame(tok_ds) 
+index = tok_df.loc[tok_df['tok_sum_len'] <= 8]
+index_ds = Dataset.from_pandas(index)
+print(index_ds['summary'][0:10])
+
+#%% Longest summaries
+tok_df = pd.DataFrame(tok_ds) 
+index = tok_df.loc[tok_df['tok_sum_len'] == 80]
+index_ds = Dataset.from_pandas(index)
+
+#%% Longer than 100 summaries
+tok_df = pd.DataFrame(tok_ds) 
+index = tok_df.loc[tok_df['tok_sum_len'] == 100]
+index_ds = Dataset.from_pandas(index)
+print(index_ds['summary'][0:10])
+
+#%% Texts short 91
+tok_df = pd.DataFrame(tok_ds) 
+index = tok_df.loc[tok_df['tok_text_len'] == 91]
+index_ds = Dataset.from_pandas(index)
+print(index_ds['text'][0:10])
+
+#%% Texts long 2119
+tok_df = pd.DataFrame(tok_ds) 
+index = tok_df.loc[tok_df['tok_text_len'] >= 2119]
+index_ds = Dataset.from_pandas(index)
+print(index_ds['text'][0:10])
+
 # %% Filtering based on cutoffs
 tok_df = pd.DataFrame(tok_ds) # pandas dataframe version
 tok_df_clean = tok_df
-# minimum summary length
+# minimum summary length 
 tok_df_clean = tok_df_clean.loc[tok_df_clean['tok_sum_len'] >= min_sum_len]
 # maximum summary length
 tok_df_clean = tok_df_clean.loc[tok_df_clean['tok_sum_len'] <= max_sum_len]
@@ -132,7 +170,7 @@ plt.savefig('text_tokens_cleaned.png')
 plt.show()
 
 # %% save it
-tok_ds_clean.to_csv('data/tok_ds_clean.csv')
+tok_ds_clean.to_csv('datatok_ds_clean.csv')
 # Went from 25k to 23425
 # Now only 20837 with 90% of data cutoffs
 # 96% return 23172
