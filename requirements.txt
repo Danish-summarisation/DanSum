@@ -24,3 +24,4 @@ wandb==0.12.16
 
 # hyperparameter search
 ray[tune]==2.0.0
+hyperopt==0.2.7

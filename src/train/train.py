@@ -4,6 +4,7 @@ This script contains the code for finetuning a pretrained mT5 model for summaris
 
 # Importing modules
 import nltk
+import ssl
 import numpy as np
 import pandas as pd
 import wandb
@@ -29,7 +30,10 @@ nltk.download("punkt")
 rouge_metric = datasets.load_metric("rouge")
 bert_metric = datasets.load_metric("bertscore")
 
-wandb.init(project="summarisation", entity="idasara")
+ssl._create_default_https_context = _create_unverified_https_context
+nltk.download('punkt')
+
+wandb.init(project="hyperparameter-search", entity="danish-summarisation")
 wandb.run.name = timestr
 
 # Load data
@@ -175,7 +179,7 @@ test_data = dd["test"]
 
 def generate_summary(batch):
     # prepare test data
-    batch["text"] = [prefix + doc for doc in batch["text"]]
+    batch["text"] = [doc for doc in batch["text"]]
     inputs = tokenizer(
         batch["text"],
         padding="max_length",
@@ -198,7 +202,7 @@ def generate_summary(batch):
 
 
 # generate summaries for test set with the function
-results = test_data.map(generate_summary, batched=True, batch_size=batch_size)
+results = test_data.map(generate_summary, batched=True, batch_size=8)
 
 pred_str = results["pred"]  # the model's generated summary
 label_str = results["summary"]  # actual ref summary from test set
@@ -208,8 +212,13 @@ rouge_output = rouge_metric.compute(predictions=pred_str, references=label_str)
 bert_output = bert_metric.compute(predictions=pred_str, references=label_str, lang='da')
 
 # save predictions and rouge scores on test set
+results = pd.DataFrame([results])
 results.to_csv("home/sarakolind/" + timestr + "_preds.csv")
+
+rouge_output = pd.DataFrame([rouge_output])
 rouge_output.to_csv("home/sarakolind/" + timestr + "_rouge.csv")
+
+bert_output = pd.DataFrame([bert_output])
 bert_output.to_csv("home/sarakolind/" + timestr + "_bert.csv")
 
 end = time.time()
