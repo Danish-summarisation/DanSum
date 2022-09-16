@@ -1,3 +1,10 @@
+defaults:
+  - override hydra/sweeper: optuna
+sampler:
+  _target_: optuna.samplers.TPESampler
+n_trials: 20
+n_jobs: 1
+
 model_checkpoint: "google/mt5-small" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
 model_name: "mt3-small-25k-baseline" # str
 device: "cuda" # str: "cuda" or "cpu"
@@ -19,15 +26,15 @@ model:
   no_repeat_ngram_size: 3 # int: no repeat ngram size
   length_penalty: 5.0 # float: length penalty
   early_stopping: True # bool: early stopping
-  dropout: 0.1 # float: dropout
+  dropout: interval(0.0, 0.3) # float: dropout
 
 training:
   output_dir: "home/sarakolind/models" # str: output directory
   overwrite_output_dir: True # bool: overwrite output directory
   evaluation_strategy: "steps" # str: "steps" or "epoch"
   save_strategy: "steps" # str: "steps" or "epoch"
-  learning_rate: 5e-5 # float: learning rate
-  lr_scheduler_type: "constant" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
+  learning_rate: interval(5e-6, 5e-4) # float: learning rate
+  lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
   per_device_train_batch_size: 8 # int: batch size
   per_device_eval_batch_size: 8 # int: batch size
   logging_steps: 100 # int: log every x steps
@@ -35,7 +42,7 @@ training:
   eval_steps: 200 # int: evaluate every x steps
   warm_up_steps: 100 # int: warm up steps
   save_total_limit: 1 # int: number of checkpoints to save
-  num_train_epochs: 1 # int: number of epochs
+  num_train_epochs: int(interval(1, 41)) # int: number of epochs
   predict_with_generate: True # bool: predict with generate
   fp16: True # bool: use fp16
   load_best_model_at_end: True # bool: load best model at end

@@ -40,6 +40,8 @@ from transformers import (
     T5Tokenizer,
 )
 
+from .utils import flatten_nested_config
+
 
 def load_dataset(cfg) -> Dataset:
     """
@@ -162,7 +164,7 @@ def main(cfg: DictConfig) -> None:
     """
     # Setup
     # Setting up wandb
-    wandb.init(project="da-newsroom-summerization", config=cfg)
+    wandb.init(project="da-newsroom-summerization", config=flatten_nested_config(cfg), mode=cfg.wandb_mode)
     nltk.download("punkt")
 
     # load dataset
