@@ -3,3 +3,8 @@
 
 # wandb
 wandb/*
+
+# hydra log
+outputs/*
+# python 
+*.pyc

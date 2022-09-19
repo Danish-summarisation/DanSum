@@ -11,16 +11,16 @@ python train.py
 if you want to overwrite specific parameters, you can do so by passing them as arguments to the script, e.g.
 
 ```bash
-python train.py --config_file config.yaml training_data.max_input_length=512
+python train.py --config config.yaml training_data.max_input_length=512
 ```
 
-or by passing a config file with the `--config_file` flag, e.g.
+or by passing a config file with the `--config` flag, e.g.
 
 ```bash
-python train.py --config_file config.yaml
+python train.py --config config.yaml
 ```
 """
-
+import os
 import time
 from functools import partial
 
@@ -30,45 +30,48 @@ import nltk
 import numpy as np
 import pandas as pd
 import wandb
-from datasets import Dataset
-from OmegaConf import DictConfig
+import ssl
+from datasets import load_dataset
+from omegaconf import DictConfig
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    T5Tokenizer,
+    AutoTokenizer,
 )
 
-from .utils import flatten_nested_config
+from utils import flatten_nested_config
+
+os.environ["HF_DATASETS_CACHE"] = "."
 
 
-def load_dataset(cfg) -> Dataset:
-    """
-    Load the cleaned danewsroom dataset
-    """
-    cfg = cfg.training_data
-    # Load data
-    train = Dataset.from_pandas(
-        pd.read_csv(
-            cfg.dataset.train_path,
-            usecols=[cfg.text_column, cfg.summary_column],
-        )
-    )
-    val = Dataset.from_pandas(
-        pd.read_csv(
-            cfg.dataset.val_path,
-            usecols=[cfg.text_column, cfg.summary_column],
-        )
-    )
-    test = Dataset.from_pandas(
-        pd.read_csv(
-            cfg.dataset.test_path,
-            usecols=[cfg.text_column, cfg.summary_column],
-        )
-    )
-    # make into datasetdict format
-    return datasets.DatasetDict({"train": train, "validation": val, "test": test})
+# def load_dataset(cfg) -> Dataset:
+#     """
+#     Load the cleaned danewsroom dataset
+#     """
+#     cfg = cfg.training_data
+#     # Load data
+#     train = Dataset.from_pandas(
+#         pd.read_csv(
+#             cfg.train_path,
+#             usecols=[cfg.text_column, cfg.summary_column],
+#         )
+#     )
+#     val = Dataset.from_pandas(
+#         pd.read_csv(
+#             cfg.val_path,
+#             usecols=[cfg.text_column, cfg.summary_column],
+#         )
+#     )
+#     test = Dataset.from_pandas(
+#         pd.read_csv(
+#             cfg.test_path,
+#             usecols=[cfg.text_column, cfg.summary_column],
+#         )
+#     )
+#     # make into datasetdict format
+#     return datasets.DatasetDict({"train": train, "validation": val, "test": test})
 
 
 def preprocess_function(examples, tokenizer, cfg):
@@ -79,10 +82,10 @@ def preprocess_function(examples, tokenizer, cfg):
     model_inputs = tokenizer(inputs, max_length=cfg.max_input_length, truncation=True)
 
     # tokenize the ref summary + truncate to max input length
-    with tokenizer.as_target_tokenizer():
-        labels = tokenizer(
-            examples["summary"], max_length=cfg.max_target_length, truncation=True
-        )
+
+    labels = tokenizer(
+        examples["summary"], max_length=cfg.max_target_length, truncation=True
+    )
 
     # getting IDs for token
     model_inputs["labels"] = labels["input_ids"]
@@ -157,27 +160,56 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     return metrics
 
 
-@hydra.main(config_path="configs", config_name="default_config")
+def setup_nltk():
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
+    nltk.download("punkt")
+
+
+@hydra.main(config_path="../../configs", config_name="default_config")
 def main(cfg: DictConfig) -> None:
     """
     Main function for training the model.
     """
     # Setup
     # Setting up wandb
-    wandb.init(project="da-newsroom-summerization", config=flatten_nested_config(cfg), mode=cfg.wandb_mode)
-    nltk.download("punkt")
+    wandb.init(
+        project="da-newsroom-summerization",
+        config=flatten_nested_config(cfg),
+        mode=cfg.wandb_mode,
+    )
+
+    setup_nltk()
 
     # load dataset
-    dataset = load_dataset(cfg)
+    # dataset = load_dataset(cfg)
+    dataset = load_dataset(
+        "csv",
+        data_files={
+            "train": cfg.training_data.train_path,
+            "validation": cfg.training_data.val_path,
+            "test": cfg.training_data.test_path,
+        },
+        cache_dir=".",
+    )
     start = time.time()
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
-    _preprocess = partial(preprocess_function, tokenizer=tokenizer, cfg=cfg)
-    tokenized_datasets = dataset.map(_preprocess, batched=True)
+    # _preprocess = partial(preprocess_function, tokenizer=tokenizer, cfg=cfg)
+    # tokenized_datasets = dataset.map(_preprocess, batched=True)
+    tokenized_datasets = dataset.map(
+        lambda batch: preprocess_function(batch, tokenizer, cfg),
+        batched=True,
+        load_from_cache_file=True,
+    )
 
     # Fine-tuning
     # load the pretrained mT5 model from the Huggingface hub
