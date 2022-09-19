@@ -6,5 +6,7 @@ wandb/*
 
 # hydra log
 outputs/*
+multirun/*
+
 # python 
 *.pyc

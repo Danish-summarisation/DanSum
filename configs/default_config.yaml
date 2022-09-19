@@ -1,3 +1,10 @@
+defaults:
+  - override hydra/sweeper: optuna
+sampler:
+  _target_: optuna.samplers.TPESampler
+n_trials: 20
+n_jobs: 1
+
 model_checkpoint: "google/mt5-small" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
 model_name: "mt3-small-25k-baseline" # str
 device: "cuda" # str: "cuda" or "cpu"
@@ -42,3 +49,11 @@ training:
   load_best_model_at_end: True # bool: load best model at end
   metric_for_best_model: "loss" # str: metric for best model
   pad_to_multiple_of: 8 # int: pad to multiple of
+
+hydra:
+  sweeper:
+    params:
+      ++training.learning_rate: interval(5e-6, 5e-4)
+      # dropout: interval(0.0, 0.3)
+      # lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
+      # num_train_epochs: int(interval(1, 41)) # int: number of epochs
