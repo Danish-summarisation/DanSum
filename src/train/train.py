@@ -211,11 +211,11 @@ def main(cfg: DictConfig) -> None:
     tokenized_datasets = dataset.map(
         lambda batch: preprocess_function(batch, tokenizer, cfg),
         batched=True,
-        load_from_cache_file=True,
+        load_from_cache_file=not cfg.redo_cache,
         cache_file_names={
-            "train": os.path.join(cfg.cache_dir, cfg.training_data.train_path),
-            "validation": os.path.join(cfg.cache_dir, cfg.training_data.val_path),
-            "test": os.path.join(cfg.cache_dir, cfg.training_data.test_path),
+            "train": os.path.join(cfg.cache_dir, "train"),
+            "validation": os.path.join(cfg.cache_dir, "val"),
+            "test": os.path.join(cfg.cache_dir, "test"),
         },
     )
 
@@ -275,6 +275,7 @@ def main(cfg: DictConfig) -> None:
     trainer.train()
 
     # Testing
+    
     model.to(cfg.device)
     test_data = dataset["test"]
 
