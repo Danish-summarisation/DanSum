@@ -22,17 +22,22 @@ python train.py --config config.yaml
 """
 import os
 import time
+import ssl
 from functools import partial
 
-import datasets
-import hydra
 import nltk
+
 import numpy as np
 import pandas as pd
+
 import wandb
-import ssl
-from datasets import load_dataset
+
+import hydra
 from omegaconf import DictConfig
+
+import datasets
+
+from datasets import load_dataset
 from transformers import (
     AutoModelForSeq2SeqLM,
     DataCollatorForSeq2Seq,
@@ -43,28 +48,26 @@ from transformers import (
 
 from utils import flatten_nested_config
 
-os.environ["HF_DATASETS_CACHE"] = "."
 
-
-# def load_dataset(cfg) -> Dataset:
+# def load_dataset(cfg) -> datasets.Dataset:
 #     """
 #     Load the cleaned danewsroom dataset
 #     """
 #     cfg = cfg.training_data
 #     # Load data
-#     train = Dataset.from_pandas(
+#     train = datasets.Dataset.from_pandas(
 #         pd.read_csv(
 #             cfg.train_path,
 #             usecols=[cfg.text_column, cfg.summary_column],
 #         )
 #     )
-#     val = Dataset.from_pandas(
+#     val = datasets.Dataset.from_pandas(
 #         pd.read_csv(
 #             cfg.val_path,
 #             usecols=[cfg.text_column, cfg.summary_column],
 #         )
 #     )
-#     test = Dataset.from_pandas(
+#     test = datasets.Dataset.from_pandas(
 #         pd.read_csv(
 #             cfg.test_path,
 #             usecols=[cfg.text_column, cfg.summary_column],
@@ -170,7 +173,9 @@ def setup_nltk():
     nltk.download("punkt")
 
 
-@hydra.main(config_path="../../configs", config_name="default_config")
+@hydra.main(
+    config_path="../../configs", config_name="default_config", version_base="1.2"
+)
 def main(cfg: DictConfig) -> None:
     """
     Main function for training the model.
@@ -194,7 +199,7 @@ def main(cfg: DictConfig) -> None:
             "validation": cfg.training_data.val_path,
             "test": cfg.training_data.test_path,
         },
-        cache_dir=".",
+        cache_dir=cfg.cache_dir,
     )
     start = time.time()
 
@@ -203,12 +208,15 @@ def main(cfg: DictConfig) -> None:
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
-    # _preprocess = partial(preprocess_function, tokenizer=tokenizer, cfg=cfg)
-    # tokenized_datasets = dataset.map(_preprocess, batched=True)
     tokenized_datasets = dataset.map(
         lambda batch: preprocess_function(batch, tokenizer, cfg),
         batched=True,
         load_from_cache_file=True,
+        cache_file_names={
+            "train": os.path.join(cfg.cache_dir, cfg.training_data.train_path),
+            "validation": os.path.join(cfg.cache_dir, cfg.training_data.val_path),
+            "test": os.path.join(cfg.cache_dir, cfg.training_data.test_path),
+        },
     )
 
     # Fine-tuning

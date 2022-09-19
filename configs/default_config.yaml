@@ -3,6 +3,7 @@ model_name: "mt3-small-25k-baseline" # str
 device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
+cache_dir: "/data/cache" # str
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str
@@ -11,7 +12,6 @@ training_data:
   test_path: "/data/danish_summarization_danewsroom/test25k_clean.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
-  pad_to_multiple_of: 8 # int: pad to multiple of
 model:
   min_length: 15 # int: min summary length
   max_length: 128 # int: max summary length
@@ -22,7 +22,7 @@ model:
   dropout_rate: 0.1 # float: dropout
 
 training:
-  output_dir: "home/sarakolind/models" # str: output directory
+  output_dir: "/data/danish_summarization_danewsroom/models" # str: output directory
   overwrite_output_dir: True # bool: overwrite output directory
   evaluation_strategy: "steps" # str: "steps" or "epoch"
   save_strategy: "steps" # str: "steps" or "epoch"
@@ -40,3 +40,4 @@ training:
   fp16: True # bool: use fp16
   load_best_model_at_end: True # bool: load best model at end
   metric_for_best_model: "loss" # str: metric for best model
+  pad_to_multiple_of: 8 # int: pad to multiple of
