@@ -274,40 +274,6 @@ def main(cfg: DictConfig) -> None:
     # train the model!
     trainer.train()
 
-    # Testing
-    
-    model.to(cfg.device)
-    test_data = dataset["test"]
-
-    # generate summaries for test set with the function
-    _generate_summary = partial(generate_summary, model=model, tokenizer=tokenizer)
-    results = test_data.map(
-        _generate_summary,
-        batched=True,
-        batch_size=cfg.training.per_device_eval_batch_size,
-    )
-
-    pred_str = results["pred"]  # the model's generated summary
-    label_str = results["summary"]  # actual ref summary from test set
-
-    # compute rouge scores
-    rouge_metric = datasets.load_metric("rouge")
-    bert_metric = datasets.load_metric("bertscore")
-    rouge_output = rouge_metric.compute(predictions=pred_str, references=label_str)
-    bert_output = bert_metric.compute(
-        predictions=pred_str, references=label_str, lang=cfg.language
-    )
-
-    # save predictions and rouge scores on test set
-    results = pd.DataFrame([results])
-    results.to_csv(cfg.training.output_dir + "/" + wandb.run.name + "_preds.csv")
-
-    rouge_output = pd.DataFrame([rouge_output])
-    rouge_output.to_csv(cfg.training.output_dir + "/" + wandb.run.name + "_rouge.csv")
-
-    bert_output = pd.DataFrame([bert_output])
-    bert_output.to_csv(cfg.training.output_dir + "/" + wandb.run.name + "_bert.csv")
-
     end = time.time()
     print("TIME SPENT:")
     print(end - start)
