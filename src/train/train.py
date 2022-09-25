@@ -25,6 +25,8 @@ import time
 import ssl
 from functools import partial
 
+# from tkinter import E
+
 import nltk
 
 import numpy as np
@@ -277,6 +279,8 @@ def main(cfg: DictConfig) -> None:
     end = time.time()
     print("TIME SPENT:")
     print(end - start)
+
+    return trainer.state.log_history[3]["eval_loss"]
 
 
 if __name__ == "__main__":
