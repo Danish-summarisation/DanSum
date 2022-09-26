@@ -20,6 +20,7 @@ or by passing a config file with the `--config` flag, e.g.
 python train.py --config config.yaml
 ```
 """
+
 import os
 import time
 import ssl
@@ -45,7 +46,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    AutoTokenizer,
+    T5Tokenizer,
 )
 
 from utils import flatten_nested_config
@@ -184,8 +185,8 @@ def main(cfg: DictConfig) -> None:
     """
     # Setup
     # Setting up wandb
-    wandb.init(
-        project="da-newsroom-summerization",
+    run = wandb.init(
+        project=cfg.project_name,
         config=flatten_nested_config(cfg),
         mode=cfg.wandb_mode,
     )
@@ -207,7 +208,7 @@ def main(cfg: DictConfig) -> None:
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
+    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -236,7 +237,7 @@ def main(cfg: DictConfig) -> None:
 
     # specify training arguments
     args = Seq2SeqTrainingArguments(
-        output_dir=cfg.training.output_dir + wandb.run.name,
+        output_dir=cfg.training.output_dir + run.name,
         evaluation_strategy=cfg.training.evaluation_strategy,
         save_strategy=cfg.training.save_strategy,
         learning_rate=cfg.training.learning_rate,
@@ -254,6 +255,7 @@ def main(cfg: DictConfig) -> None:
         fp16=cfg.training.fp16,
         load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
+        max_grad_norm=cfg.training.max_grad_norm,
     )
 
     # pad the articles and ref summaries (with -100) to max input length
@@ -280,7 +282,9 @@ def main(cfg: DictConfig) -> None:
     print("TIME SPENT:")
     print(end - start)
 
-    return trainer.state.log_history[3]["eval_loss"]
+    eval_score = trainer.evaluate()
+    run.finish()
+    return eval_score["eval_loss"]
 
 
 if __name__ == "__main__":
