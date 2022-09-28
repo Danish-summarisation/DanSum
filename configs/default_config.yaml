@@ -11,14 +11,14 @@ model_name: "mt3-small-25k-baseline" # str
 device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
-cache_dir: "/data/danish_summarization_danewsroom/cache_sara" # str
+cache_dir: "/data-big-projects/danish_summarization_danewsroom/cache_sara" # str
 redo_cache: False # bool: True or False. If True, will not use cached data
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str
-  train_path: "/data/danish_summarization_danewsroom/train25k_clean.csv" # str
-  val_path: "/data/danish_summarization_danewsroom/val25k_clean.csv" # str
-  test_path: "/data/danish_summarization_danewsroom/test25k_clean.csv" # str
+  train_path: "/data-big-projects/danish_summarization_danewsroom/train25k_clean.csv" # str
+  val_path: "/data-big-projects/danish_summarization_danewsroom/val25k_clean.csv" # str
+  test_path: "/data-big-projects/danish_summarization_danewsroom/test25k_clean.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
 model:
@@ -31,7 +31,7 @@ model:
   dropout_rate: 0.1 # float: dropout
 
 training:
-  output_dir: "/data/danish_summarization_danewsroom/models" # str: output directory
+  output_dir: "/data-big-projects/danish_summarization_danewsroom/models/" # str: output directory
   overwrite_output_dir: True # bool: overwrite output directory
   evaluation_strategy: "steps" # str: "steps" or "epoch"
   save_strategy: "steps" # str: "steps" or "epoch"
