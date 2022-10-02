@@ -210,6 +210,16 @@ def main(cfg: DictConfig) -> None:
     # removed fast because of warning message
     tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
 
+    if cfg.training_data.quality_filter:
+        dataset = dataset.filter(lambda x: x["passed_quality"] is True)
+        summary_types = cfg.training_data.summary_type # a list
+
+        if "mixed" not in summary_types:
+            dataset = dataset.filter(lambda x: x["summary_type"] != "mixed")
+
+        if "extractive" not in summary_types:
+            dataset = dataset.filter(lambda x: x["summary_type"] != "extractive")
+
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
         lambda batch: preprocess_function(batch, tokenizer, cfg),

@@ -21,6 +21,9 @@ training_data:
   test_path: "/data-big-projects/danish_summarization_danewsroom/test25k_clean.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
+  quality_filter: False # bool: True or False. If True, will use filtered dataset
+  summary_types: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
+
 model:
   min_length: 9 # int: min summary length
   max_length: 128 # int: max summary length
@@ -55,10 +58,12 @@ training:
 hydra:
   sweeper:
     params:
-      training.learning_rate: interval(5e-6, 5e-4)
-      model.dropout_rate: interval(0.0, 0.3)
-      training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
-      training.num_train_epochs: int(interval(1, 41)) # int: number of epochs
-      model.no_repeat_ngram_size: int(interval(2, 5))
-      model.length_penalty: int(interval(4, 10))
+      training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
+      model.dropout_rate: interval(0.0, 0.05) # (0.0, 0.3)
+      training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
+      training.num_train_epochs: int(interval(1, 31)) # (1, 41)
+      model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
+      model.length_penalty: int(interval(4, 7)) # (4, 10)
       training.max_grad_norm: int(interval(1, 10))
+      training_data.quality_filter: choice(True, False)
+      training_data.summary_types: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
