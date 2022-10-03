@@ -2,8 +2,7 @@
 .DS_Store
 
 # wandb
-wandb/*
-src/train/wandb/*
+**/wandb/*
 
 # hydra log
 multirun/*
