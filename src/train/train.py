@@ -39,6 +39,7 @@ import hydra
 from omegaconf import DictConfig
 
 import datasets
+from evaluation.fragments import Fragments
 
 from datasets import load_dataset
 from transformers import (
@@ -102,13 +103,15 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     rouge_metric = datasets.load_metric("rouge")
     bert_metric = datasets.load_metric("bertscore")
 
-    predictions, labels = eval_pred  # labels = the reference summaries
+    predictions, labels, inputs = eval_pred  # labels = the reference summaries
     # decode generated summaries from IDs to actual words
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     # replace -100 in the labels as we can't decode them, replace with pad token id instead
     labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
     # decode reference summaries from IDs to actual words
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+    # decode articles from IDs to actual words
+    decoded_inputs = tokenizer.batch_decode(inputs, skip_special_tokens=True)
 
     # Rouge expects a newline after each sentence
     decoded_preds = [
@@ -127,6 +130,11 @@ def compute_metrics(eval_pred, tokenizer, cfg):
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language
     )
     result["bertscore"] = np.mean(bertscores["precision"])
+
+    # compute density
+    fragment = Fragments(decoded_preds, decoded_inputs, lang=cfg.language)
+    density = fragment.density()
+    result["density"] = np.mean(density)
 
     # add mean generated length
     prediction_lens = [
