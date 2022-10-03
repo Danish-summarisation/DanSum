@@ -52,32 +52,6 @@ from transformers import (
 from utils import flatten_nested_config
 
 
-# def load_dataset(cfg) -> datasets.Dataset:
-#     """
-#     Load the cleaned danewsroom dataset
-#     """
-#     cfg = cfg.training_data
-#     # Load data
-#     train = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.train_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     val = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.val_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     test = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.test_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     # make into datasetdict format
-#     return datasets.DatasetDict({"train": train, "validation": val, "test": test})
 
 
 def preprocess_function(examples, tokenizer, cfg):
