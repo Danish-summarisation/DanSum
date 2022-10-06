@@ -1,6 +1,7 @@
 '''
 This script preprocesses the data from the DaNewsroom data sets.
 Applying cutoffs, filtering out the abstractive data and saving the data files.
+Also applying a quality filter.
 '''
 # %% Load modules
 import pandas as pd
@@ -113,6 +114,100 @@ graph.set_title('Number of tokens in filtered article texts')
 plt.savefig('/home/sarakolind/DanSum/text_tokens_cleaned.png')
 plt.show()
 
-# %% save it
+'''
+Quality filter is from the following github: https://github.com/centre-for-humanities-computing/danish-foundation-models/blob/b16765c065818f9d4b162d2b2ab9b3dae7d252ea/src/dfm/cleaning/quality_filter.py
+'''
+# %% Aplying quality filter
+# NB: Have the quality_filter.py script in your working directory
+from quality_filter import QualityFilter
+qf = QualityFilter(
+        min_stop_words = 2,
+        mean_word_length = (3, 10),
+        doc_length = (10, 100_000),
+        alpha_ratio = 0.6,
+        duplicate_lines_chr_fraction = 0.4,
+        duplicate_paragraph_chr_fraction= 0.4,
+        top_ngram_chr_fraction_thresholds = [0.20, 0.18, 0.16],
+        top_ngram_chr_fraction_range = (2, 4),
+        top_ngram_min_count = 3,
+        duplicate_n_gram_fraction_thresholds = [
+            0.25,
+            0.24,
+            0.23,
+            0.22,
+            0.21,
+            0.20,
+        ],
+        ignore_filters = ["duplicate_ngram_chr_fraction", "top_ngram_chr_fraction", "line_bullets_or_ellipsis", "detect_language", "short_long_sentece"],
+        )
+
+filter_to_ignore = ["doc_length", 
+                    "alpha_ratio", 
+                    "symbol_2_word_ellipsis", 
+                    "duplicate_lines_chr_fraction", 
+                    "top_ngram_chr_fraction", 
+                    "duplicate_ngram_chr_fraction", 
+                    "detect_language", 
+                    "stop_word", 
+                    "mean_word_length", 
+                    "line_bullets_or_ellipsis"]
+
+qf_sum = QualityFilter(
+        min_stop_words = 2,
+        mean_word_length = (3, 10),
+        doc_length = (10, 100_000),
+        alpha_ratio = 0.6,
+        duplicate_lines_chr_fraction = 0.5,
+        duplicate_paragraph_chr_fraction= 0.6,
+        top_ngram_chr_fraction_thresholds = [0.20, 0.18, 0.16],
+        top_ngram_chr_fraction_range = (2, 4),
+        top_ngram_min_count = 3,
+        duplicate_n_gram_fraction_thresholds = [
+            0.25,
+            0.24,
+            0.23,
+            0.22,
+            0.21,
+            0.20,
+        ],
+        ignore_filters = filter_to_ignore,
+        )
+
+# %% 
+# Lists of texts
+texts = tok_ds_clean['text']
+summaries = tok_ds_clean['summary']
+
+filtered = qf.describe_filter(texts) # giver jer hvilke som bliver filtreret fra og af hvilket filter
+filtered_sum = qf_sum.describe_filter(summaries) 
+passed_quality = [None] * len(texts)
+filter = [None] * len(texts) # empty list
+passed_quality_sum = [None] * len(texts)
+filter_sum = [None] * len(texts) # empty list
+
+for n, i in enumerate(texts):
+    result = next(filtered)
+    result_sum = next(filtered_sum)
+    if  result == "passed filters": 
+            passed_quality[n] = True
+            filter[n] = "nan"
+    else:
+            passed_quality[n] = False
+            filter[n] = result
+    # same for summaries
+    if result_sum == "passed filters":
+            passed_quality_sum[n] = True
+            filter_sum[n] = "nan"
+    else:
+            passed_quality_sum[n] = False
+            filter_sum[n] = result_sum
+
+tok_ds_clean['passed_quality'] = passed_quality
+tok_ds_clean['filter'] = filter
+tok_ds_clean['passed_quality_sum'] = passed_quality_sum
+tok_ds_clean['filter_sum'] = filter_sum
+
+# %% Saving it
 tok_ds_clean.to_csv('/data/danish_summarization_danewsroom/tok_ds_clean.csv')
-# %%
+
+
