@@ -16,9 +16,9 @@ redo_cache: False # bool: True or False. If True, will not use cached data
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str
-  train_path: "/data-big-projects/danish_summarization_danewsroom/train25k_clean.csv" # str
-  val_path: "/data-big-projects/danish_summarization_danewsroom/val25k_clean.csv" # str
-  test_path: "/data-big-projects/danish_summarization_danewsroom/test25k_clean.csv" # str
+  train_path: "/data-big-projects/danish_summarization_danewsroom/train_clean_filtered.csv" # str
+  val_path: "/data-big-projects/danish_summarization_danewsroom/val_clean_filtered.csv" # str
+  test_path: "/data-big-projects/danish_summarization_danewsroom/test_clean_filtered.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
   quality_filter: False # bool: True or False. If True, will use filtered dataset

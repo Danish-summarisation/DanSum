@@ -5,6 +5,8 @@ protobuf==3.19.1
 # preprocessing
 sentencepiece==0.1.96
 nltk==3.6.5
+langdetect==1.0.9
+luga==0.2.6
 
 # training
 git+https://github.com/sarakolding/transformers
