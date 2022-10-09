@@ -39,7 +39,7 @@ import hydra
 from omegaconf import DictConfig
 
 import datasets
-from evaluation.fragments import Fragments
+from fragments import Fragments
 
 from datasets import load_dataset
 from transformers import (
@@ -51,8 +51,6 @@ from transformers import (
 )
 
 from utils import flatten_nested_config
-
-
 
 
 def preprocess_function(examples, tokenizer, cfg):
@@ -194,7 +192,7 @@ def main(cfg: DictConfig) -> None:
 
     if cfg.training_data.quality_filter:
         dataset = dataset.filter(lambda x: x["passed_quality"] is True)
-        summary_types = cfg.training_data.summary_type # a list
+        summary_types = cfg.training_data.summary_type  # a list
 
         if "mixed" not in summary_types:
             dataset = dataset.filter(lambda x: x["summary_type"] != "mixed")

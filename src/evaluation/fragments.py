@@ -1,4 +1,9 @@
-################################################################################
+"""
+This script includes code for computing density for summaries.
+
+Originial code from:
+https://github.com/danielvarab/da-newsroom/blob/master/newsroom-lib/newsroom/analyze/fragments.py
+"""
 
 import html as _html
 import itertools as _itertools
@@ -21,7 +26,7 @@ LANGUAGES = {
     "en": lambda: _spacy.load("en_core_web_sm"),
     "fr": lambda: _spacy.load("fr_core_news_sm"),
     "es": lambda: _spacy.load("es_core_news_sm"),
-    "it": lambda: _spacy.load("it_core_news_sm")
+    "it": lambda: _spacy.load("it_core_news_sm"),
 }
 
 
@@ -37,25 +42,24 @@ class Fragments(object):
                 # language not installed/supported
                 err_msg = "Couldn't recognize language model: '%s'. " % lang
                 err_msg += "You might have to download a model. For english run\n"
-                err_msg += "\tpython -m spacy download en_core_web_sm" 
+                err_msg += "\tpython -m spacy download en_core_web_sm"
                 raise ModuleNotFoundError(err_msg)
 
             cls._nlp = language()  # it's a callback
 
-    def __init__(self, summary, text, lang, tokenize = True, case = False):
+    def __init__(self, summary, text, lang, tokenize=True, case=False):
 
         self._load_model(lang)
 
         self._tokens = tokenize
 
         self.summary = self._tokenize(summary) if tokenize else summary.split()
-        self.text    = self._tokenize(text)    if tokenize else text.split()
+        self.text = self._tokenize(text) if tokenize else text.split()
 
         self._norm_summary = self._normalize(self.summary, case)
-        self._norm_text    = self._normalize(self.text, case)
+        self._norm_text = self._normalize(self.text, case)
 
         self._match(self._norm_summary, self._norm_text)
-
 
     def _tokenize(self, text):
 
@@ -64,22 +68,15 @@ class Fragments(object):
         This is optional, can be disabled in constructor.
         """
 
-        return self._nlp(text, disable = ["tagger", "parser", "ner", "textcat"])
+        return self._nlp(text, disable=["tagger", "parser", "ner", "textcat"])
 
-
-    def _normalize(self, tokens, case = False):
+    def _normalize(self, tokens, case=False):
 
         """
         Lowercases and turns tokens into distinct words.
         """
 
-        return [
-            str(t).lower()
-            if not case
-            else str(t)
-            for t in tokens
-        ]
-
+        return [str(t).lower() if not case else str(t) for t in tokens]
 
     def overlaps(self):
 
@@ -93,8 +90,7 @@ class Fragments(object):
 
         return self._matches
 
-
-    def strings(self, min_length = 0, raw = None, summary_base = True):
+    def strings(self, min_length=0, raw=None, summary_base=True):
 
         """
         Return a list of explicit match strings between the summary and reference.
@@ -119,8 +115,7 @@ class Fragments(object):
 
         strings = [
             base[i : i + length]
-            for i, j, length
-            in self.overlaps()
+            for i, j, length in self.overlaps()
             if length > min_length
         ]
 
@@ -137,8 +132,7 @@ class Fragments(object):
 
         return strings
 
-
-    def coverage(self, summary_base = True):
+    def coverage(self, summary_base=True):
 
         """
         Return the COVERAGE score of the summary and text.
@@ -150,14 +144,17 @@ class Fragments(object):
 
         numerator = sum(o.length for o in self.overlaps())
 
-        if summary_base: denominator = len(self.summary)
-        else:            denominator = len(self.reference)
+        if summary_base:
+            denominator = len(self.summary)
+        else:
+            denominator = len(self.reference)
 
-        if denominator == 0: return 0
-        else:                return numerator / denominator
+        if denominator == 0:
+            return 0
+        else:
+            return numerator / denominator
 
-
-    def density(self, summary_base = True):
+    def density(self, summary_base=True):
 
         """
         Return the DENSITY score of summary and text.
@@ -167,16 +164,19 @@ class Fragments(object):
             - decimal DENSITY score within [0, ...]
         """
 
-        numerator = sum(o.length ** 2 for o in self.overlaps())
+        numerator = sum(o.length**2 for o in self.overlaps())
 
-        if summary_base: denominator = len(self.summary)
-        else:            denominator = len(self.reference)
+        if summary_base:
+            denominator = len(self.summary)
+        else:
+            denominator = len(self.reference)
 
-        if denominator == 0: return 0
-        else:                return numerator / denominator
+        if denominator == 0:
+            return 0
+        else:
+            return numerator / denominator
 
-
-    def compression(self, text_to_summary = True):
+    def compression(self, text_to_summary=True):
 
         """
         Return compression ratio between summary and text.
@@ -190,13 +190,14 @@ class Fragments(object):
 
         try:
 
-            if text_to_summary: return ratio[0] / ratio[1]
-            else:               return ratio[1] / ratio[0]
+            if text_to_summary:
+                return ratio[0] / ratio[1]
+            else:
+                return ratio[1] / ratio[0]
 
         except ZeroDivisionError:
 
             return 0
-
 
     def _match(self, a, b):
 
@@ -220,8 +221,7 @@ class Fragments(object):
                     a_end = a_start
                     b_end = b_start
 
-                    while a_end < len(a) and b_end < len(b) \
-                            and b[b_end] == a[a_end]:
+                    while a_end < len(a) and b_end < len(b) and b[b_end] == a[a_end]:
 
                         b_end += 1
                         a_end += 1
@@ -252,7 +252,6 @@ class Fragments(object):
 
                 a_start += 1
 
-
     def _htmltokens(self, tokens):
 
         """
@@ -262,14 +261,12 @@ class Fragments(object):
         return [
             [
                 _html.escape(t.text).replace("\n", "<br/>"),
-                _html.escape(t.whitespace_).replace("\n", "<br/>")
+                _html.escape(t.whitespace_).replace("\n", "<br/>"),
             ]
-
             for t in tokens
         ]
 
-
-    def annotate(self, min_length = 0, text_truncation = None, novel_italics = False):
+    def annotate(self, min_length=0, text_truncation=None, novel_italics=False):
 
         """
         Used to annotate fragments for website visualization.
@@ -334,19 +331,25 @@ class Fragments(object):
 
             # Summary starting tag.
 
-            summary[overlap.summary][0] = start.format(
-                color = color,
-                ref = ref,
-                length = overlap.length,
-            ) + summary[overlap.summary][0]
+            summary[overlap.summary][0] = (
+                start.format(
+                    color=color,
+                    ref=ref,
+                    length=overlap.length,
+                )
+                + summary[overlap.summary][0]
+            )
 
             # Text starting tag.
 
-            text[overlap.text][0] = start.format(
-                color = color,
-                ref = ref,
-                length = overlap.length,
-            ) + text[overlap.text][0]
+            text[overlap.text][0] = (
+                start.format(
+                    color=color,
+                    ref=ref,
+                    length=overlap.length,
+                )
+                + text[overlap.text][0]
+            )
 
             # Summary ending tag.
 
@@ -365,34 +368,31 @@ class Fragments(object):
 
         return summary, text
 
-
     def _itercolors(self):
 
         # Endlessly cycle through these colors.
 
-        return _itertools.cycle((
-
-            "#393b79",
-            "#5254a3",
-            "#6b6ecf",
-            "#9c9ede",
-            "#637939",
-            "#8ca252",
-            "#b5cf6b",
-            "#cedb9c",
-            "#8c6d31",
-            "#bd9e39",
-            "#e7ba52",
-            "#e7cb94",
-            "#843c39",
-            "#ad494a",
-            "#d6616b",
-            "#e7969c",
-            "#7b4173",
-            "#a55194",
-            "#ce6dbd",
-            "#de9ed6",
-
-        ))
-
-################################################################################
+        return _itertools.cycle(
+            (
+                "#393b79",
+                "#5254a3",
+                "#6b6ecf",
+                "#9c9ede",
+                "#637939",
+                "#8ca252",
+                "#b5cf6b",
+                "#cedb9c",
+                "#8c6d31",
+                "#bd9e39",
+                "#e7ba52",
+                "#e7cb94",
+                "#843c39",
+                "#ad494a",
+                "#d6616b",
+                "#e7969c",
+                "#7b4173",
+                "#a55194",
+                "#ce6dbd",
+                "#de9ed6",
+            )
+        )
