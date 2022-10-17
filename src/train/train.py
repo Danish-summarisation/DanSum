@@ -192,13 +192,13 @@ def main(cfg: DictConfig) -> None:
 
     if cfg.training_data.quality_filter:
         dataset = dataset.filter(lambda x: x["passed_quality"] is True)
-        summary_types = cfg.training_data.summary_type  # a list
+    summary_types = cfg.training_data.summary_type  # a list
 
-        if "mixed" not in summary_types:
-            dataset = dataset.filter(lambda x: x["summary_type"] != "mixed")
+    if "mixed" not in summary_types:
+        dataset = dataset.filter(lambda x: x["density_bin"] != "mixed")
 
-        if "extractive" not in summary_types:
-            dataset = dataset.filter(lambda x: x["summary_type"] != "extractive")
+    if "extractive" not in summary_types:
+        dataset = dataset.filter(lambda x: x["density_bin"] != "extractive")
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
