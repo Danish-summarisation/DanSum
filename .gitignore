@@ -1,7 +1,13 @@
 # MacOS
 .DS_Store
 
+# wandb
+wandb
+
+# hydra log
 multirun
 outputs
-wandb
-__pycache__
+multirun
+
+# python 
+*.pyc

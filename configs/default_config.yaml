@@ -1,0 +1,70 @@
+defaults:
+  - override hydra/sweeper: optuna
+sampler:
+  _target_: optuna.samplers.TPESampler
+n_trials: 20
+n_jobs: 1
+
+project_name: "danewsroom"
+model_checkpoint: "google/mt5-small" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
+model_name: "mt3-small-25k-baseline" # str
+device: "cuda" # str: "cuda" or "cpu"
+language: "da" # str: e.g. "da"
+wandb_mode: "run" # str: "run" or "dryrun"
+wandb_entity: "danish-summarisation" # str:
+cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache" # str
+redo_cache: False # bool: True or False. If True, will not use cached data
+training_data:
+  text_column: "text" # str
+  summary_column: "summary" # str
+  train_path: "/data-big-projects/danish-summarization-danewsroom/train_clean1.csv" # str
+  val_path: "/data-big-projects/danish-summarization-danewsroom/val_clean1.csv" # str
+  test_path: "/data-big-projects/danish-summarization-danewsroom/test_clean1.csv" # str
+  max_input_length: 1024 # int:  max text (article) max token length
+  max_target_length: 128 # int: max reference summary max token length
+  quality_filter: False # bool: True or False. If True, will use filtered dataset
+  summary_type: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
+
+model:
+  min_length: 9 # int: min summary length
+  max_length: 128 # int: max summary length
+  num_beams: 2 # int: number of beams for beam search
+  no_repeat_ngram_size: 3 # int: no repeat ngram size
+  length_penalty: 5.0 # float: length penalty
+  early_stopping: False # bool: early stopping
+  dropout_rate: 0.1 # float: dropout
+
+training:
+  output_dir: "/data-big-projects/danish-summarization-danewsroom/models/" # str: output directory
+  overwrite_output_dir: True # bool: overwrite output directory
+  evaluation_strategy: "steps" # str: "steps" or "epoch"
+  save_strategy: "steps" # str: "steps" or "epoch"
+  learning_rate: 5e-5 # float: learning rate
+  lr_scheduler_type: "constant" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
+  per_device_train_batch_size: 30 # int: batch size
+  per_device_eval_batch_size: 30 # int: batch size
+  logging_steps: 100 # int: log every x steps
+  save_steps: 2000 # int: save every x steps
+  eval_steps: 2000 # int: evaluate every x steps
+  warmup_steps: 20 # int: warm up steps
+  save_total_limit: 1 # int: number of checkpoints to save
+  num_train_epochs: 1 # int: number of epochs
+  predict_with_generate: True # bool: predict with generate
+  fp16: True # bool: use fp16
+  load_best_model_at_end: True # bool: load best model at end
+  metric_for_best_model: "loss" # str: metric for best model
+  pad_to_multiple_of: 8 # int: pad to multiple of
+  max_grad_norm: 1 # float
+
+hydra:
+  sweeper:
+    params:
+      training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
+      model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
+      training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
+      training.num_train_epochs: int(interval(1, 10)) # (1, 41)
+      model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
+      model.length_penalty: int(interval(4, 7)) # (4, 10)
+      training.max_grad_norm: int(interval(1, 10))
+      training_data.quality_filter: choice(True, False)
+      training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
