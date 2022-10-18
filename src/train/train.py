@@ -25,6 +25,8 @@ import time
 import ssl
 from functools import partial
 
+# from tkinter import E
+
 import nltk
 
 import numpy as np
@@ -36,6 +38,7 @@ import hydra
 from omegaconf import DictConfig
 
 import datasets
+from fragments import Fragments
 
 from datasets import load_dataset
 from transformers import (
@@ -43,38 +46,10 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    AutoTokenizer,
+    T5Tokenizer,
 )
 
 from utils import flatten_nested_config
-
-
-# def load_dataset(cfg) -> datasets.Dataset:
-#     """
-#     Load the cleaned danewsroom dataset
-#     """
-#     cfg = cfg.training_data
-#     # Load data
-#     train = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.train_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     val = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.val_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     test = datasets.Dataset.from_pandas(
-#         pd.read_csv(
-#             cfg.test_path,
-#             usecols=[cfg.text_column, cfg.summary_column],
-#         )
-#     )
-#     # make into datasetdict format
-#     return datasets.DatasetDict({"train": train, "validation": val, "test": test})
 
 
 def preprocess_function(examples, tokenizer, cfg):
@@ -125,13 +100,15 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     rouge_metric = datasets.load_metric("rouge")
     bert_metric = datasets.load_metric("bertscore")
 
-    predictions, labels = eval_pred  # labels = the reference summaries
+    predictions, labels, inputs = eval_pred  # labels = the reference summaries
     # decode generated summaries from IDs to actual words
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     # replace -100 in the labels as we can't decode them, replace with pad token id instead
     labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
     # decode reference summaries from IDs to actual words
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+    # decode articles from IDs to actual words
+    decoded_inputs = tokenizer.batch_decode(inputs, skip_special_tokens=True)
 
     # Rouge expects a newline after each sentence
     decoded_preds = [
@@ -150,6 +127,11 @@ def compute_metrics(eval_pred, tokenizer, cfg):
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language
     )
     result["bertscore"] = np.mean(bertscores["precision"])
+
+    # compute density
+    fragment = Fragments(decoded_preds, decoded_inputs, lang=cfg.language)
+    density = fragment.density()
+    result["density"] = np.mean(density)
 
     # add mean generated length
     prediction_lens = [
@@ -182,10 +164,11 @@ def main(cfg: DictConfig) -> None:
     """
     # Setup
     # Setting up wandb
-    wandb.init(
-        project="da-newsroom-summerization",
+    run = wandb.init(
+        project=cfg.project_name,
         config=flatten_nested_config(cfg),
         mode=cfg.wandb_mode,
+        entity=cfg.wandb_entity,
     )
 
     setup_nltk()
@@ -205,7 +188,17 @@ def main(cfg: DictConfig) -> None:
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
+    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
+
+    if cfg.training_data.quality_filter:
+        dataset = dataset.filter(lambda x: x["passed_quality"] is True)
+    summary_types = cfg.training_data.summary_type  # a list
+
+    if "mixed" not in summary_types:
+        dataset = dataset.filter(lambda x: x["density_bin"] != "mixed")
+
+    if "extractive" not in summary_types:
+        dataset = dataset.filter(lambda x: x["density_bin"] != "extractive")
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -234,7 +227,7 @@ def main(cfg: DictConfig) -> None:
 
     # specify training arguments
     args = Seq2SeqTrainingArguments(
-        output_dir=cfg.training.output_dir + wandb.run.name,
+        output_dir=cfg.training.output_dir + run.name,
         evaluation_strategy=cfg.training.evaluation_strategy,
         save_strategy=cfg.training.save_strategy,
         learning_rate=cfg.training.learning_rate,
@@ -252,6 +245,7 @@ def main(cfg: DictConfig) -> None:
         fp16=cfg.training.fp16,
         load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
+        max_grad_norm=cfg.training.max_grad_norm,
     )
 
     # pad the articles and ref summaries (with -100) to max input length
@@ -277,6 +271,10 @@ def main(cfg: DictConfig) -> None:
     end = time.time()
     print("TIME SPENT:")
     print(end - start)
+
+    eval_score = trainer.evaluate()
+    run.finish()
+    return eval_score["eval_loss"]
 
 
 if __name__ == "__main__":
