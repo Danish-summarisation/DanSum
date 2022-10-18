@@ -1,2 +1,7 @@
 # MacOS
 .DS_Store
+
+multirun
+outputs
+wandb
+__pycache__
