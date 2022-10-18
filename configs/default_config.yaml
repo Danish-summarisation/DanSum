@@ -59,9 +59,9 @@ hydra:
   sweeper:
     params:
       training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
-      model.dropout_rate: interval(0.0, 0.05) # (0.0, 0.3)
+      model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
       training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
-      training.num_train_epochs: int(interval(1, 31)) # (1, 41)
+      training.num_train_epochs: int(interval(1, 10)) # (1, 41)
       model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
       model.length_penalty: int(interval(4, 7)) # (4, 10)
       training.max_grad_norm: int(interval(1, 10))
