@@ -169,6 +169,7 @@ def main(cfg: DictConfig) -> None:
         project=cfg.project_name,
         config=flatten_nested_config(cfg),
         mode=cfg.wandb_mode,
+        entity=cfg.wandb_entity,
     )
 
     setup_nltk()
