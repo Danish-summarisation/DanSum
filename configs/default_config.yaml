@@ -66,4 +66,4 @@ hydra:
       model.length_penalty: int(interval(4, 7)) # (4, 10)
       training.max_grad_norm: int(interval(1, 10))
       training_data.quality_filter: choice(True, False)
-      training_data.summary_types: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
+      training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
