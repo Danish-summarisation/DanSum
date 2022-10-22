@@ -4,7 +4,7 @@ This script  prepares subsets and train-test-val splits of the cleaned data.
 
 # %% LOAD PACKAGES
 import pandas as pd
-from datasets import Dataset, load_dataset
+from datasets import Dataset, concatenate_datasets, load_dataset
 seed = 22 # implement a seed to ensure replication
 
 # %% LOAD DATA
@@ -35,47 +35,49 @@ df_clean = pd.DataFrame(ds_clean)  # pandas dataframe version
 
 # %% --- MAKE ALL CLEAN 89-10-1 SUBSET SPLIT
 # 10% of whole dataset ~1 mil
-test_len = round(len(ds_clean) / 10)  # test is 10%
-val_len = round(len(ds_clean) / 10)  # validation is 10%
+# test_len = round(len(ds_clean) / 10)  # test is 10%
+# val_len = round(len(ds_clean) / 10)  # validation is 10%
 
 # subsetting abstractive samples
 df_abs = df_clean[df_clean['density_bin'] == 'abstractive']
 df_abs = df_abs.drop(columns='__index_level_0__')
 ds_abs = Dataset.from_pandas(df_abs)
 
+df_mix = df_clean[df_clean['density_bin'] == 'mixed']
+df_mix = df_mix.drop(columns='__index_level_0__')
+ds_mix = Dataset.from_pandas(df_mix)
+
+df_ext = df_clean[df_clean['density_bin'] == 'extractive']
+df_ext = df_ext.drop(columns='__index_level_0__')
+ds_ext = Dataset.from_pandas(df_ext)
+
 # 10% of abstractive dataset ~200k
-# test_len = round(len(abs) / 10)  # test is 10%
-# val_len = round(len(abs) / 10)
+test_len = round(len(df_abs) / 10)  # test is 10%
+val_len = round(len(df_abs) / 10)
 
 # creating test and val splits
-abs1, test_clean1 = ds_abs.train_test_split(
+abs_train, abs_test = ds_abs.train_test_split(
     test_size=test_len, seed=seed
 ).values()  # absolute size specified
-train_clean2, val_clean1 = abs1.train_test_split(
+abs_train, abs_val = abs_train.train_test_split(
     test_size=val_len, seed=seed
 ).values()
 
-# converting to df
-df_test = pd.DataFrame(test_clean1)
-df_val = pd.DataFrame(val_clean1)
+mix_train, mix_test = ds_mix.train_test_split(
+    test_size=test_len, seed=seed
+).values() 
 
-# creating train split by isolating parts of data that are not in either test or val splits
-outer = df_clean[['text', 'summary']].merge(df_test[['text', 'summary']], how='outer', indicator=True)
-anti_join = outer[(outer._merge=='left_only')].drop('_merge', axis=1)
-outer1 = anti_join[['text', 'summary']].merge(df_val[['text', 'summary']], how='outer', indicator=True)
-anti_join1 = outer1[(outer1._merge=='left_only')].drop('_merge', axis=1)
+ext_train, ext_test = ds_ext.train_test_split(
+    test_size=test_len, seed=seed
+).values() 
 
-# merging other columns back on
-df_train = anti_join1.merge(df_clean, how='left')
-
-# converting back to dataset and shuffling
-df_train = df_train.drop(columns='__index_level_0__')
-train_clean1 = Dataset.from_pandas(df_train)
-
-# shuffling training set?
-train_clean1 = train_clean1.shuffle(seed=seed)
+train = concatenate_datasets([abs_train, mix_train])
+train = concatenate_datasets([train, ext_train])
 
 # %% save train test and val CSV for all clean
-train_clean1.to_csv("/data-big-projects/danish-summarization-danewsroom/train_clean1.csv")
-test_clean1.to_csv("/data-big-projects/danish-summarization-danewsroom/test_clean1.csv")
-val_clean1.to_csv("/data-big-projects/danish-summarization-danewsroom/val_clean1.csv")
+train.to_csv("/data-big-projects/danish-summarization-danewsroom/train_all.csv")
+abs_val.to_csv("/data-big-projects/danish-summarization-danewsroom/val_abstractive.csv")
+abs_test.to_csv("/data-big-projects/danish-summarization-danewsroom/test_abstractive.csv")
+mix_test.to_csv("/data-big-projects/danish-summarization-danewsroom/mix_abstractive.csv")
+ext_test.to_csv("/data-big-projects/danish-summarization-danewsroom/ext_abstractive.csv")
+
