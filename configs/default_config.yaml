@@ -12,8 +12,8 @@ device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
 wandb_entity: "danish-summarisation" # str:
-cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache" # str
-redo_cache: False # bool: True or False. If True, will not use cached data
+cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache_" # str
+redo_cache: True # bool: True or False. If True, will not use cached data
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str
@@ -22,7 +22,7 @@ training_data:
   test_path: "/data-big-projects/danish-summarization-danewsroom/test_abstractive.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
-  quality_filter: False # bool: True or False. If True, will use filtered dataset
+  quality_filter: True # bool: True or False. If True, will use filtered dataset
   summary_type: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
 
 model:
@@ -55,6 +55,8 @@ training:
   metric_for_best_model: "loss" # str: metric for best model
   pad_to_multiple_of: 8 # int: pad to multiple of
   max_grad_norm: 1 # float
+  max_steps: 1800
+  include_inputs_for_metrics: True
 
 hydra:
   sweeper:

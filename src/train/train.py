@@ -107,6 +107,8 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
     # decode reference summaries from IDs to actual words
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+    # replace -100 in the labels as we can't decode them, replace with pad token id instead
+    inputs = np.where(inputs != -100, inputs, tokenizer.pad_token_id)
     # decode articles from IDs to actual words
     decoded_inputs = tokenizer.batch_decode(inputs, skip_special_tokens=True)
 
@@ -116,6 +118,9 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     ]
     decoded_labels = [
         "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels
+    ]
+    decoded_inputs = [
+        "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_inputs
     ]
 
     # compute ROUGE scores
@@ -129,8 +134,8 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     result["bertscore"] = np.mean(bertscores["precision"])
 
     # compute density
-    fragment = Fragments(decoded_preds, decoded_inputs, lang=cfg.language)
-    density = fragment.density()
+    fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
+    density = [frag.density() for frag in fragment]
     result["density"] = np.mean(density)
 
     # add mean generated length
@@ -180,7 +185,6 @@ def main(cfg: DictConfig) -> None:
         data_files={
             "train": cfg.training_data.train_path,
             "validation": cfg.training_data.val_path,
-            "test": cfg.training_data.test_path,
         },
         cache_dir=cfg.cache_dir,
     )
@@ -195,10 +199,10 @@ def main(cfg: DictConfig) -> None:
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
-        dataset = dataset.filter(lambda x: x["density_bin"] != "mixed")
+        dataset['train'] = dataset['train'].filter(lambda x: x["density_bin"] != "mixed")
 
     if "extractive" not in summary_types:
-        dataset = dataset.filter(lambda x: x["density_bin"] != "extractive")
+        dataset['train'] = dataset['train'].filter(lambda x: x["density_bin"] != "extractive")
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -208,7 +212,6 @@ def main(cfg: DictConfig) -> None:
         cache_file_names={
             "train": os.path.join(cfg.cache_dir, "train"),
             "validation": os.path.join(cfg.cache_dir, "val"),
-            "test": os.path.join(cfg.cache_dir, "test"),
         },
     )
 
@@ -246,6 +249,8 @@ def main(cfg: DictConfig) -> None:
         load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
+        max_steps=cfg.training.max_steps,
+        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics
     )
 
     # pad the articles and ref summaries (with -100) to max input length
