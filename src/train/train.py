@@ -46,7 +46,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    T5Tokenizer,
+    AutoTokenizer,
 )
 
 from utils import flatten_nested_config
@@ -192,17 +192,7 @@ def main(cfg: DictConfig) -> None:
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
-
-    if cfg.training_data.quality_filter:
-        dataset = dataset.filter(lambda x: x["passed_quality"] is True)
-    summary_types = cfg.training_data.summary_type  # a list
-
-    if "mixed" not in summary_types:
-        dataset['train'] = dataset['train'].filter(lambda x: x["density_bin"] != "mixed")
-
-    if "extractive" not in summary_types:
-        dataset['train'] = dataset['train'].filter(lambda x: x["density_bin"] != "extractive")
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -214,6 +204,16 @@ def main(cfg: DictConfig) -> None:
             "validation": os.path.join(cfg.cache_dir, "val"),
         },
     )
+
+    if cfg.training_data.quality_filter:
+        tokenized_datasets = tokenized_datasets.filter(lambda x: x["passed_quality"] is True)
+    summary_types = cfg.training_data.summary_type  # a list
+
+    if "mixed" not in summary_types:
+        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "mixed")
+
+    if "extractive" not in summary_types:
+        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "extractive")
 
     # Fine-tuning
     # load the pretrained mT5 model from the Huggingface hub
