@@ -1,2 +1,12 @@
 # MacOS
 .DS_Store
+
+# Python
+*.pyc
+
+# wandb
+wandb
+
+# hydra
+outputs
+multirun
