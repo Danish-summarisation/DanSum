@@ -24,23 +24,23 @@ training_data:
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
   quality_filter: False # bool: True or False. If True, will use filtered dataset
-  summary_type: ["abstractive, mixed"] # list of str. Binned density categories for reference summaries included in the dataset
+  summary_type: ["abstractive", "mixed"] # list of str. Binned density categories for reference summaries included in the dataset
 
 model:
   min_length: 9 # int: min summary length
   max_length: 128 # int: max summary length
   num_beams: 2 # int: number of beams for beam search
   no_repeat_ngram_size: 3 # int: no repeat ngram size
-  length_penalty: 5.0 # float: length penalty
+  length_penalty: 4.0 # float: length penalty changed from 5.0
   early_stopping: False # bool: early stopping
-  dropout_rate: 0.1 # float: dropout
+  dropout_rate: 0.02 # float: dropout changed from 0.1
 
 training:
   output_dir: "/data-big-projects/danish-summarization-danewsroom/models/" # str: output directory
   overwrite_output_dir: True # bool: overwrite output directory
   evaluation_strategy: "steps" # str: "steps" or "epoch"
   save_strategy: "steps" # str: "steps" or "epoch"
-  learning_rate: 0.003 # float: learning rate
+  learning_rate: 0.0003 # float: learning rate changed from 0.003
   lr_scheduler_type: "constant" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
   per_device_train_batch_size: 30 # int: batch size
   per_device_eval_batch_size: 30 # int: batch size
