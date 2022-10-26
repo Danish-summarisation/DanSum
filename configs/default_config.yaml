@@ -11,8 +11,10 @@ device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
 wandb_entity: "danish-summarisation" # str:
-cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache_" # str
-redo_cache: False # bool: True or False. If True, will not use cached data
+cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache_" # str: only used for loading the dataset see preprocess_path for the path to the preprocessed data
+force_preprocess: False # bool: Force preprocessing of data
+preprocess_path: "/data-big-projects/danish-summarization-danewsroom/cache/preprocessed.arrow" # Optional[str]: the path to load the preprocessed dataset from (or save to if it does nok exist at the path)
+num_proc: 20 # int: number of processes to use for preprocessing
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str

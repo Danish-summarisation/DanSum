@@ -178,47 +178,48 @@ def main(cfg: DictConfig) -> None:
 
     setup_nltk()
 
-    # load dataset
-    # dataset = load_dataset(cfg)
-    dataset = load_dataset(
-        "csv",
-        data_files={
-            "train": cfg.training_data.train_path,
-            "validation": cfg.training_data.val_path,
-        },
-        cache_dir=cfg.cache_dir,
-    )
     start = time.time()
-
-    # Preprocessing
-    # removed fast because of warning message
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
+    if (
+        cfg.preprocess_path and os.path.isdir(cfg.preprocess_path)
+    ) and not cfg.force_preprocess:
+        print("Loading preprocessed data...")
+        tokenized_datasets = datasets.load_from_disk(cfg.preprocess_path)
+    else:
+        dataset = load_dataset(
+            "csv",
+            data_files={
+                "train": cfg.training_data.train_path,
+                "validation": cfg.training_data.val_path,
+            },
+            cache_dir=cfg.cache_dir,
+        )
 
-    # make the tokenized datasets using the preprocess function
-    tokenized_datasets = dataset.map(
-        lambda batch: preprocess_function(batch, tokenizer, cfg),
-        batched=True,
-        load_from_cache_file=not cfg.redo_cache,
-        cache_file_names={
-            "train": os.path.join(cfg.cache_dir, "train"),
-            "validation": os.path.join(cfg.cache_dir, "val"),
-        },
-    )
+        # make the tokenized datasets using the preprocess function
+        tokenized_datasets = dataset.map(
+            lambda batch: preprocess_function(batch, tokenizer, cfg), batched=True
+        )
+        # write to disk
+        if cfg.preprocess_path:
+            tokenized_datasets.save_to_disk(cfg.preprocess_path)
 
     if cfg.training_data.quality_filter:
         tokenized_datasets = tokenized_datasets.filter(
-            lambda x: x["passed_quality"] is True
+            lambda x: x["passed_quality"] is True,
+            num_proc=cfg.num_proc,
         )
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
         tokenized_datasets["train"] = tokenized_datasets["train"].filter(
-            lambda x: x["density_bin"] != "mixed"
+            lambda x: x["density_bin"] != "mixed",
+            num_proc=cfg.num_proc,
         )
 
     if "extractive" not in summary_types:
         tokenized_datasets["train"] = tokenized_datasets["train"].filter(
-            lambda x: x["density_bin"] != "extractive"
+            lambda x: x["density_bin"] != "extractive",
+            num_proc=cfg.num_proc,
         )
 
     # Fine-tuning
