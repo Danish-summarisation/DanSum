@@ -25,12 +25,9 @@ import time
 import ssl
 from functools import partial
 
-# from tkinter import E
-
 import nltk
 
 import numpy as np
-import pandas as pd
 
 import wandb
 
@@ -134,7 +131,10 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     result["bertscore"] = np.mean(bertscores["precision"])
 
     # compute density
-    fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
+    fragment = [
+        Fragments(decoded_pred, decoded_input, lang=cfg.language)
+        for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)
+    ]
     density = [frag.density() for frag in fragment]
     result["density"] = np.mean(density)
 
@@ -206,14 +206,20 @@ def main(cfg: DictConfig) -> None:
     )
 
     if cfg.training_data.quality_filter:
-        tokenized_datasets = tokenized_datasets.filter(lambda x: x["passed_quality"] is True)
+        tokenized_datasets = tokenized_datasets.filter(
+            lambda x: x["passed_quality"] is True
+        )
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "mixed")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "mixed"
+        )
 
     if "extractive" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "extractive")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "extractive"
+        )
 
     # Fine-tuning
     # load the pretrained mT5 model from the Huggingface hub
@@ -250,7 +256,7 @@ def main(cfg: DictConfig) -> None:
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         max_steps=cfg.training.max_steps,
-        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics
+        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
     )
 
     # pad the articles and ref summaries (with -100) to max input length
