@@ -41,8 +41,8 @@ training:
   save_strategy: "steps" # str: "steps" or "epoch"
   learning_rate: 0.0003 # float: learning rate
   lr_scheduler_type: "polynomial" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
-  per_device_train_batch_size: 32 # int: batch size
-  per_device_eval_batch_size: 32 # int: batch size
+  per_device_train_batch_size: 2 # int: batch size
+  per_device_eval_batch_size: 2 # int: batch size
   logging_steps: 500 # int: log every x steps
   save_steps: 5000 # int: save every x steps
   eval_steps: 4000 # int: evaluate every x steps
@@ -57,6 +57,7 @@ training:
   max_grad_norm: 5 # float
   max_steps: 1800
   include_inputs_for_metrics: True
+  gradient_accumulation_steps: 2
 
 hydra:
   sweeper:

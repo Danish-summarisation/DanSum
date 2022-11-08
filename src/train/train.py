@@ -250,7 +250,8 @@ def main(cfg: DictConfig) -> None:
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         max_steps=cfg.training.max_steps,
-        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics
+        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
+        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps
     )
 
     # pad the articles and ref summaries (with -100) to max input length
