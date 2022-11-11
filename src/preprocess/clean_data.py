@@ -32,26 +32,25 @@ def preprocess_function(examples):
 ds = load_dataset(
     "csv",
     data_files={
-        "train": "/home/ucloud/data/dansum/train_all_filter.csv",
-        "validation": "/home/ucloud/data/dansum/val_abstractive_filter.csv",
+        "train": "/data-big-projects/danish-summarization-danewsroom/danewsroom.csv"
     }
 )
 
 ds_train = ds["train"]
-ds_val = ds["validation"]
+# ds_val = ds["validation"]
 
 # %% Filter by density
-# df_abstractive = pd.DataFrame(ds_train)
-# df_abstractive = df_abstractive[df_abstractive.density <= 1.5]
-# print(len(df_abstractive))  # 287205
-# df_abstractive.to_csv("/home/sarakolind/DanSum/df_abstractive.csv")  # save csv
+df_abstractive = pd.DataFrame(ds_train)
+df_abstractive = df_abstractive[df_abstractive.density <= 1.5]
+print(len(df_abstractive))  # 287205
+#df_abstractive.to_csv("/home/sarakolind/DanSum/df_abstractive.csv")  # save csv
 
 # %% Clean by filter token article/summary length cutoffs
-# df_abstractive = pd.read_csv("/home/sarakolind/DanSum/df_abstractive.csv")  # load csv
+#df_abstractive = pd.read_csv("/home/sarakolind/DanSum/df_abstractive.csv")  # load csv
 
-# # %% Convert data format
-# ds_abstractive = Dataset.from_pandas(df_abstractive)
-# dd_abstractive = datasets.DatasetDict({"data": ds_abstractive})
+# %% Convert data format
+ds_abstractive = Dataset.from_pandas(df_abstractive)
+dd_abstractive = datasets.DatasetDict({"data": ds_abstractive})
 
 # # %% Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained("google/mt5-small")  # choose tokenizer
@@ -64,42 +63,40 @@ ds_train = ds_train.remove_columns(['summary', 'text'])
 ds_train = ds_train.rename_column('summary_fix', 'summary')
 ds_train = ds_train.rename_column('text_fix', 'text')
 
-v_sums = [fix_text(i) for i in ds_val['summary']]
-v_texts = [fix_text(i) for i in ds_val['text']]
-ds_val = ds_val.add_column("summary_fix", v_sums)
-ds_val = ds_val.add_column("text_fix", v_texts)
-ds_val = ds_val.remove_columns(['summary', 'text'])
-ds_val = ds_val.rename_column('summary_fix', 'summary')
-ds_val = ds_val.rename_column('text_fix', 'text')
+# v_sums = [fix_text(i) for i in ds_val['summary']]
+# v_texts = [fix_text(i) for i in ds_val['text']]
+# ds_val = ds_val.add_column("summary_fix", v_sums)
+# ds_val = ds_val.add_column("text_fix", v_texts)
+# ds_val = ds_val.remove_columns(['summary', 'text'])
+# ds_val = ds_val.rename_column('summary_fix', 'summary')
+# ds_val = ds_val.rename_column('text_fix', 'text')
 
 # %% tokenize chosen data
 tok_dd = ds_train.map(preprocess_function, batched=True)
-tok_val = ds_val.map(preprocess_function, batched=True)
-# tok_ds = tok_dd["data"]  # turn back into dataset (not dict)
+# tok_val = ds_val.map(preprocess_function, batched=True)
+tok_ds = tok_dd#["data"]  # turn back into dataset (not dict)
 
 # %% add features to ds with the TOKENISED lengths of ref summary and text/article
 tok_text_len = [len(text) for text in tok_dd["input_ids"]]  # input ids is the articles
-tok_dd = tok_dd.remove_columns("tok_text_len")
 tok_ds = tok_dd.add_column("tok_text_len", tok_text_len)
 tok_sum_len = [
     len(summary) for summary in tok_ds["labels"]
 ]  # labels is the ref summaries
-tok_ds = tok_ds.remove_columns("tok_sum_len")
 tok_ds = tok_ds.add_column("tok_sum_len", tok_sum_len)
 
-tok_text_len = [len(text) for text in tok_val["input_ids"]]  # input ids is the articles
-tok_val = tok_val.remove_columns("tok_text_len")
-tok_dv = tok_val.add_column("tok_text_len", tok_text_len)
-tok_sum_len = [
-    len(summary) for summary in tok_val["labels"]
-]  # labels is the ref summaries
-tok_dv = tok_dv.remove_columns("tok_sum_len")
-tok_dv = tok_dv.add_column("tok_sum_len", tok_sum_len)
+# tok_text_len = [len(text) for text in tok_val["input_ids"]]  # input ids is the articles
+# tok_val = tok_val.remove_columns("tok_text_len")
+# tok_dv = tok_val.add_column("tok_text_len", tok_text_len)
+# tok_sum_len = [
+#     len(summary) for summary in tok_val["labels"]
+# ]  # labels is the ref summaries
+# tok_dv = tok_dv.remove_columns("tok_sum_len")
+# tok_dv = tok_dv.add_column("tok_sum_len", tok_sum_len)
 
 # %% Make plot with summary length and text length to define cutoffs
 # histogram of summary token length
 # graph = seaborn.histplot(tok_ds["tok_sum_len"], color="red")
-min_sum_len = np.quantile(tok_dv["tok_sum_len"], 0.02)
+min_sum_len = np.quantile(tok_ds["tok_sum_len"], 0.02)
 max_sum_len = np.quantile(tok_ds["tok_sum_len"], 0.98)
 # graph.axvline(min_sum_len)
 # graph.axvline(max_sum_len)
@@ -112,8 +109,8 @@ max_sum_len = np.quantile(tok_ds["tok_sum_len"], 0.98)
 
 # %% histogram of text token length
 # graph = seaborn.histplot(tok_ds["tok_text_len"], color="red")
-min_text_len = np.quantile(tok_dv["tok_text_len"], 0.02)
-max_text_len = np.quantile(tok_dv["tok_text_len"], 0.98)
+min_text_len = np.quantile(tok_ds["tok_text_len"], 0.02)
+max_text_len = np.quantile(tok_ds["tok_text_len"], 0.98)
 # graph.axvline(min_text_len)
 # graph.axvline(max_text_len)
 # graph.set_xlabel("Number of tokens")
@@ -135,22 +132,9 @@ tok_df_clean = tok_df_clean.loc[tok_df_clean["tok_text_len"] >= min_text_len]
 # maximum article length
 tok_df_clean = tok_df_clean.loc[tok_df_clean["tok_text_len"] <= max_text_len]
 # make dataset format
-tok_df_clean = tok_df_clean.drop(columns='__index_level_0__')
+#tok_df_clean = tok_df_clean.drop(columns='__index_level_0__')
 tok_ds_clean = Dataset.from_pandas(tok_df_clean)
 
-# %% Plot the newly cut data summary lengths
-# graph = seaborn.histplot(tok_df_clean["tok_sum_len"], color="green")
-# graph.set_xlabel("Number of tokens")
-# graph.set_title("Number of tokens in filtered summaries")
-# plt.savefig("/home/sarakolind/DanSum/sum_tokens_cleaned.png")
-# plt.show()
-
-# %% Plot the newly cut data text lengths
-# graph = seaborn.histplot(tok_df_clean["tok_text_len"], color="green")
-# graph.set_xlabel("Number of tokens")
-# graph.set_title("Number of tokens in filtered article texts")
-# plt.savefig("/home/sarakolind/DanSum/text_tokens_cleaned.png")
-# plt.show()
 
 """
 Quality filter is from the following github: https://github.com/centre-for-humanities-computing/danish-foundation-models/blob/b16765c065818f9d4b162d2b2ab9b3dae7d252ea/src/dfm/cleaning/quality_filter.py
@@ -246,11 +230,10 @@ for n, i in enumerate(texts):
     else:
         passed_quality_sum[n] = False
         filter_sum[n] = result_sum
-tok_dv_clean=tok_dv_clean.remove_columns(['passed_quality', 'filter', 'passed_quality_sum', 'filter_sum'])
-tok_dv_clean=tok_dv_clean.add_column("passed_quality", passed_quality)
-tok_dv_clean=tok_dv_clean.add_column("filter", filter)
-tok_dv_clean=tok_dv_clean.add_column("passed_quality_sum", passed_quality_sum)
-tok_dv_clean=tok_dv_clean.add_column("filter_sum", filter_sum)
+tok_ds_clean=tok_ds_clean.add_column("passed_quality", passed_quality)
+tok_ds_clean=tok_ds_clean.add_column("filter", filter)
+tok_ds_clean=tok_ds_clean.add_column("passed_quality_sum", passed_quality_sum)
+tok_ds_clean=tok_ds_clean.add_column("filter_sum", filter_sum)
 
 # %% Saving it
-tok_ds_clean.to_csv("/data-big-projects/danish-summarization-danewsroom/tok_ds_clean.csv")
+tok_ds_clean.to_csv("/data-big-projects/danish-summarization-danewsroom/tok_ds_clean_.csv")
