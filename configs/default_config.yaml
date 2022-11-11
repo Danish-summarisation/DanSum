@@ -6,8 +6,8 @@ n_trials: 20
 n_jobs: 1
 
 project_name: "danewsroom"
-model_checkpoint: "strombergnlp/dant5-small" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
-model_name: "mt3-small-25k-baseline" # str
+model_checkpoint: "google/mt5-small" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
+model_name: "mt5-large-abstractive" # str
 device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
@@ -17,13 +17,13 @@ redo_cache: False # bool: True or False. If True, will not use cached data
 training_data:
   text_column: "text" # str
   summary_column: "summary" # str
-  train_path: "/data-big-projects/danish-summarization-danewsroom/train_all.csv" # str
-  val_path: "/data-big-projects/danish-summarization-danewsroom/val_abstractive.csv" # str
-  test_path: "/data-big-projects/danish-summarization-danewsroom/test_abstractive.csv" # str
+  train_path: "/data-big-projects/danish-summarization-danewsroom/train_all_.csv" # str
+  val_path: "/data-big-projects/danish-summarization-danewsroom/val_abstractive_.csv" # str
+  test_path: "/data-big-projects/danish-summarization-danewsroom/test_abstractive_.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
-  quality_filter: False # bool: True or False. If True, will use filtered dataset
-  summary_type: ["abstractive, mixed"] # list of str. Binned density categories for reference summaries included in the dataset
+  quality_filter: True # bool: True or False. If True, will use filtered dataset
+  summary_type: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
 
 model:
   min_length: 9 # int: min summary length
@@ -39,24 +39,24 @@ training:
   overwrite_output_dir: True # bool: overwrite output directory
   evaluation_strategy: "steps" # str: "steps" or "epoch"
   save_strategy: "steps" # str: "steps" or "epoch"
-  learning_rate: 0.003 # float: learning rate
-  lr_scheduler_type: "constant" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
-  per_device_train_batch_size: 30 # int: batch size
-  per_device_eval_batch_size: 30 # int: batch size
-  logging_steps: 100 # int: log every x steps
-  save_steps: 2000 # int: save every x steps
-  eval_steps: 2000 # int: evaluate every x steps
-  warmup_steps: 20 # int: warm up steps
-  save_total_limit: 1 # int: number of checkpoints to save
-  num_train_epochs: 1 # int: number of epochs
+  learning_rate: 0.0003 # float: learning rate
+  lr_scheduler_type: "polynomial" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
+  per_device_train_batch_size: 32 # int: batch size
+  per_device_eval_batch_size: 32 # int: batch size
+  logging_steps: 500 # int: log every x steps
+  save_steps: 5000 # int: save every x steps
+  eval_steps: 5000 # int: evaluate every x steps
+  warmup_steps: 2000 # int: warm up steps
+  save_total_limit: 100 # int: number of checkpoints to save
+  num_train_epochs: 30 # int: number of epochs
   predict_with_generate: True # bool: predict with generate
   fp16: True # bool: use fp16
   load_best_model_at_end: True # bool: load best model at end
   metric_for_best_model: "loss" # str: metric for best model
   pad_to_multiple_of: 8 # int: pad to multiple of
-  max_grad_norm: 3 # float
-  max_steps: 1800
+  max_grad_norm: 5 # float
   include_inputs_for_metrics: True
+  gradient_accumulation_steps: 4
 
 hydra:
   sweeper:

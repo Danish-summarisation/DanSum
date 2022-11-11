@@ -5,15 +5,19 @@ protobuf==3.19.1
 # preprocessing
 sentencepiece==0.1.96
 nltk==3.6.5
+langdetect==1.0.9
+luga==0.2.6
+spacy==3.4.1
+ftfy==6.1.1
 
 # training
 git+https://github.com/sarakolding/transformers
 sklearn==0.0
 
 # data
-datasets==2.3.2
+git+https://github.com/huggingface/datasets
 pandas==1.3.3
-#git+https://github.com/danielvarab/da-newsroom
+dill<0.3.5 # to allow hashing of functions (dataset cache)
 
 # evaluation
 rouge-score==0.0.4
@@ -21,3 +25,8 @@ bert_score==0.3.11
 
 # logging
 wandb==0.12.16
+
+# config system
+hydra-core>=1.2.0,<1.3.0
+# hyperparameters sweep using optuna
+hydra-optuna-sweeper>=1.2.0,<1.3.0

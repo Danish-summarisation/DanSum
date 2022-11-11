@@ -206,7 +206,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     if cfg.training_data.quality_filter:
-        tokenized_datasets = tokenized_datasets.filter(lambda x: x["passed_quality"] is True)
+        tokenized_datasets = tokenized_datasets.filter(lambda x: x["passed"] is True)
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
@@ -246,11 +246,11 @@ def main(cfg: DictConfig) -> None:
         predict_with_generate=cfg.training.predict_with_generate,
         overwrite_output_dir=cfg.training.overwrite_output_dir,
         fp16=cfg.training.fp16,
-        load_best_model_at_end=cfg.training.load_best_model_at_end,
+        #load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
-        max_steps=cfg.training.max_steps,
-        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics
+        include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
+        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps
     )
 
     # pad the articles and ref summaries (with -100) to max input length
