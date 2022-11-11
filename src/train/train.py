@@ -249,7 +249,6 @@ def main(cfg: DictConfig) -> None:
         #load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
-        max_steps=cfg.training.max_steps,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
         gradient_accumulation_steps=cfg.training.gradient_accumulation_steps
     )

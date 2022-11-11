@@ -8,9 +8,10 @@ from datasets import Dataset, concatenate_datasets, load_dataset
 seed = 22 # implement a seed to ensure replication
 
 # %% LOAD DATA
-ds_clean = load_dataset("csv", data_files="/data-big-projects/danish-summarization-danewsroom/tok_ds_clean.csv")
+ds_clean = load_dataset("csv", data_files="/data-big-projects/danish-summarization-danewsroom/tok_ds_clean_.csv")
 ds_clean = ds_clean["train"]  # right format
 df_clean = pd.DataFrame(ds_clean)  # pandas dataframe version
+df_clean['passed'] = (df_clean['passed_quality'] == True) & (df_clean['passed_quality_sum'] == True)
 
 # %% --- MAKE 25K CLEAN 80-10-10 SUBSET SPLIT
 # df25k_clean = df_clean[:25000]  # make 25k clean subset
@@ -75,9 +76,9 @@ train = concatenate_datasets([abs_train, mix_train])
 train = concatenate_datasets([train, ext_train])
 
 # %% save train test and val CSV for all clean
-train.to_csv("/data-big-projects/danish-summarization-danewsroom/train_all.csv")
-abs_val.to_csv("/data-big-projects/danish-summarization-danewsroom/val_abstractive.csv")
-abs_test.to_csv("/data-big-projects/danish-summarization-danewsroom/test_abstractive.csv")
-mix_test.to_csv("/data-big-projects/danish-summarization-danewsroom/mix_abstractive.csv")
-ext_test.to_csv("/data-big-projects/danish-summarization-danewsroom/ext_abstractive.csv")
+train.to_csv("/data-big-projects/danish-summarization-danewsroom/train_all_.csv")
+abs_val.to_csv("/data-big-projects/danish-summarization-danewsroom/val_abstractive_.csv")
+abs_test.to_csv("/data-big-projects/danish-summarization-danewsroom/test_abstractive_.csv")
+mix_test.to_csv("/data-big-projects/danish-summarization-danewsroom/test_mixed_.csv")
+ext_test.to_csv("/data-big-projects/danish-summarization-danewsroom/test_extractive_.csv")
 
