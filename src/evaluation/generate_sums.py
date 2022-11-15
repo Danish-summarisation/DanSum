@@ -1,7 +1,7 @@
 from transformers import AutoModelForSeq2SeqLM, T5TokenizerFast
 
-tokenizer = T5TokenizerFast.from_pretrained("sarakolding/dat5-summariser")
-model = AutoModelForSeq2SeqLM.from_pretrained("sarakolding/dat5-summariser")
+tokenizer = T5TokenizerFast.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-50000")
+model = AutoModelForSeq2SeqLM.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-50000")
 
 
 def generate_summary(batch):

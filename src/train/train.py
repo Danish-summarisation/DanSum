@@ -46,7 +46,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    AutoTokenizer,
+    T5Tokenizer,
 )
 
 from utils import flatten_nested_config
@@ -192,7 +192,7 @@ def main(cfg: DictConfig) -> None:
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
+    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -238,8 +238,8 @@ def main(cfg: DictConfig) -> None:
         per_device_train_batch_size=cfg.training.per_device_train_batch_size,
         per_device_eval_batch_size=cfg.training.per_device_eval_batch_size,
         logging_steps=cfg.training.logging_steps,
-        save_steps=cfg.training.save_steps,
-        eval_steps=cfg.training.eval_steps,
+        #save_steps=cfg.training.save_steps,
+        #eval_steps=cfg.training.eval_steps,
         warmup_steps=cfg.training.warmup_steps,
         save_total_limit=cfg.training.save_total_limit,
         num_train_epochs=cfg.training.num_train_epochs,
@@ -264,7 +264,9 @@ def main(cfg: DictConfig) -> None:
         model,
         args,
         train_dataset=tokenized_datasets["train"],
-        eval_dataset=tokenized_datasets["validation"],
+        # eval_dataset=tokenized_datasets["validation"],
+        # limit eval dataset
+        eval_dataset = tokenized_datasets["validation"].select(range(cfg.training_data.max_eval_samples)),
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=_compute_metrics,
