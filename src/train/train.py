@@ -131,7 +131,13 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     bertscores = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language
     )
-    result["bertscore"] = np.mean(bertscores["precision"])
+    result["bertscore"] = np.mean(bertscores["f1"])
+
+        # compute BERTScores
+    bertscores_r = bert_metric.compute(
+        predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
+    )
+    result["bertscore_r"] = np.mean(bertscores_r["f1"])
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
@@ -146,6 +152,10 @@ def compute_metrics(eval_pred, tokenizer, cfg):
 
     # round to 4 decimals
     metrics = {k: round(v, 4) for k, v in result.items()}
+
+    # log predictions on wandb
+    wandb.log({"references": decoded_labels[0:100],
+    "predictions": decoded_preds[0:100]})
 
     return metrics
 
