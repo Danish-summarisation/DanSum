@@ -54,7 +54,7 @@ ds_ext = Dataset.from_pandas(df_ext)
 
 # 10% of abstractive dataset ~200k
 test_len = round(len(df_abs) / 10)  # test is 10%
-val_len = round(len(df_abs) / 10)
+val_len = round(len(df_abs) / 50)
 
 # creating test and val splits
 abs_train, abs_test = ds_abs.train_test_split(

@@ -154,8 +154,8 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     metrics = {k: round(v, 4) for k, v in result.items()}
 
     # log predictions on wandb
-    wandb.log({"references": decoded_labels[0:100],
-    "predictions": decoded_preds[0:100]})
+    summary_table = pd.DataFrame(data={'references': decoded_labels[0:100], 'predictions': decoded_preds[0:100]})
+    wandb.log({"summaries": summary_table})
 
     return metrics
 
@@ -260,7 +260,8 @@ def main(cfg: DictConfig) -> None:
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
-        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps
+        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps,
+        max_steps=cfg.training.max_steps
     )
 
     # pad the articles and ref summaries (with -100) to max input length
