@@ -154,8 +154,10 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     metrics = {k: round(v, 4) for k, v in result.items()}
 
     # log predictions on wandb
-    summary_table = pd.DataFrame(data={'references': decoded_labels[0:100], 'predictions': decoded_preds[0:100]})
-    wandb.log({"summaries": summary_table})
+    artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
+    summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
+    artifact.add(summary_table, "summaries")
+    wandb.run.log_artifact(artifact)      
 
     return metrics
 
@@ -261,7 +263,7 @@ def main(cfg: DictConfig) -> None:
         max_grad_norm=cfg.training.max_grad_norm,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
         gradient_accumulation_steps=cfg.training.gradient_accumulation_steps,
-        max_steps=cfg.training.max_steps
+        # max_steps=cfg.training.max_steps
     )
 
     # pad the articles and ref summaries (with -100) to max input length
@@ -275,9 +277,9 @@ def main(cfg: DictConfig) -> None:
         model,
         args,
         train_dataset=tokenized_datasets["train"],
-        # eval_dataset=tokenized_datasets["validation"],
+        eval_dataset=tokenized_datasets["validation"],
         # limit eval dataset
-        eval_dataset = tokenized_datasets["validation"].select(range(cfg.training_data.max_eval_samples)),
+        # eval_dataset = tokenized_datasets["validation"].select(range(cfg.training_data.max_eval_samples)),
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=_compute_metrics,
