@@ -25,8 +25,6 @@ import time
 import ssl
 from functools import partial
 
-# from tkinter import E
-
 import nltk
 
 import numpy as np
@@ -78,14 +76,14 @@ def generate_summary(batch, tokenizer, model, cfg):
         batch["text"],
         padding="max_length",
         return_tensors="pt",
-        max_length=cfg.training.max_input_length,
+        max_length=cfg.training_data.max_input_length,
         truncation=True,
     )
     input_ids = inputs.input_ids.to(cfg.device)
     attention_mask = inputs.attention_mask.to(cfg.device)
 
     # make the model generate predictions (summaries) for articles in text set
-    outputs = model.generate(input_ids, attention_mask=attention_mask)
+    outputs = model.to(cfg.device).generate(input_ids, attention_mask=attention_mask)
 
     # all special tokens will be removed
     output_str = tokenizer.batch_decode(outputs, skip_special_tokens=True)
@@ -120,7 +118,7 @@ def compute_metrics(eval_pred, tokenizer, cfg):
         "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels
     ]
     decoded_inputs = [
-        "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_inputs
+        "\n".join(nltk.sent_tokenize(input.strip())) for input in decoded_inputs
     ]
 
     # compute ROUGE scores
@@ -133,7 +131,7 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     )
     result["bertscore"] = np.mean(bertscores["f1"])
 
-        # compute BERTScores
+    # compute BERTScores
     bertscores_r = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
     )
