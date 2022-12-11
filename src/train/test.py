@@ -75,6 +75,12 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     # round to 4 decimals
     metrics = {k: round(v, 4) for k, v in result.items()} 
 
+    # log predictions on wandb
+    artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
+    summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
+    artifact.add(summary_table, "summaries")
+    wandb.run.log_artifact(artifact)      
+
     return metrics
 
 @hydra.main(
@@ -84,6 +90,14 @@ def main(cfg: DictConfig) -> None:
     """
     Main function for training the model.
     """
+    # Setup
+    # Setting up wandb
+    run = wandb.init(
+        project=cfg.project_name,
+        config=flatten_nested_config(cfg),
+        mode=cfg.wandb_mode,
+        entity=cfg.wandb_entity,
+    )
 
     dataset = load_dataset(
             "csv",
@@ -116,7 +130,7 @@ def main(cfg: DictConfig) -> None:
     summary_types = cfg.training_data.summary_type  # a list
 
     # subset - delete later!
-    tokenized_datasets['test'] = tokenized_datasets['test'].select(range(cfg.training_data.max_eval_samples))
+    # tokenized_datasets['test'] = tokenized_datasets['test'].select(range(cfg.training_data.max_eval_samples))
 
     tokenizer = T5Tokenizer.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-60000")
     model = AutoModelForSeq2SeqLM.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-60000")
@@ -128,6 +142,8 @@ def main(cfg: DictConfig) -> None:
     
     metrics = compute_metrics(results['pred'], results['summary'], results['text'], tokenizer, cfg)
     
+    run.finish()
+
     return metrics
 
 if __name__ == "__main__":
