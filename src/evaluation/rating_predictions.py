@@ -12,7 +12,14 @@ import keyboard
 filepath = '../../data/predictions (1).csv'
 #lol = list(csv.reader(open(filepath, 'rb'), delimiter='\t'))
 df = pd.read_csv(filepath, sep=';', header=0)
-ratings = [None] * 100
+
+# create an Empty DataFrame object
+df_ratings = pd.DataFrame()
+# append columns to an empty DataFrame
+df_ratings['1st place'] = [None] * 100
+df_ratings['2nd place'] = [None] * 100
+df_ratings['3rd place'] = [None] * 100
+df_ratings['4th place'] = [None] * 100
 
 # %% Loop manually through texts
 # NB: Open the text editor to see full text and summaries if they are too long to be shown (link at the beginning of the output)
@@ -22,7 +29,8 @@ ratings = [None] * 100
 # Sometimes the code does not collect anythign the first time you click a key. 
 # This is the case if there is no new output and the code is shown to be running at start and not complete. 
 # Then just try again. 
-i = 2
+# You can always overwrite you current answer by running the code again without changing i
+i = 1
 print("Tekst", i)
 print(df['texts'][i])
 print(" ")
@@ -39,33 +47,39 @@ print(" ")
 print("Resume 4")
 print(df['d'][i]) 
 print(" ")
-print("// Press a, b, c or d to select the best summary in your opinion.")
-while True:
-    if keyboard.read_key() == "a":
-        print("You pressed 'a'.")
-        ratings[i] = "a"
-        print("Increase i by 1 and run code chunk again")
-        break
-    elif keyboard.read_key() == "b":
-        print("You pressed 'b'.")
-        ratings[i] = "b"
-        print("Increase i by 1 and run code chunk again")
-        break
-    elif keyboard.read_key() == "c":
-        print("You pressed 'c'.")
-        ratings[i] = "c"
-        print("Increase i by 1 and run code chunk again")
-        break
-    elif keyboard.read_key() == "d":
-        print("You pressed 'd'.")
-        ratings[i] = "d"
-        print("Increase i by 1 and run code chunk again")
-        break
+print("// Press a, b, c or d to select the best summary in your opinion for 1st place, 2nd, 3rd and 4th place")
+for column in df_ratings:
+    print("// Choose the", column)
+    while True:
+        if keyboard.read_key() == "a":
+            print(" ")
+            print("You pressed 'a'.")
+            df_ratings[column][i]= "a"
+            print("Increase i by 1 and run code chunk again")
+            break
+        elif keyboard.read_key() == "b":
+            print(" ")
+            print("You pressed 'b'.")
+            df_ratings[column][i] = "b"
+            print("Increase i by 1 and run code chunk again")
+            break
+        elif keyboard.read_key() == "c":
+            print(" ")
+            print("You pressed 'c'.")
+            df_ratings[column][i] = "c"
+            print("Increase i by 1 and run code chunk again")
+            break
+        elif keyboard.read_key() == "d":
+            print(" ")
+            print("You pressed 'd'.")
+            df_ratings[column][i] = "d"
+            print("// Increase i by 1 and run code chunk again")
+            break
 
 # In the end when i == 99 
 # Check that you have a rating in each element of the list "ratings"
 # Thus, no "None" in any element of the list
 
 #%% Save ratings as a new column to the csv file
-df['ratings'] = ratings
-df.to_csv('ratings_yourName.csv')
+# If you are working over time, maybe save the work as you go and then just check how far you are and load in this df that was saved and continue but remember to not loose your ratings but add thos in yourself
+df_ratings.to_csv('ratings_yourName.csv')
