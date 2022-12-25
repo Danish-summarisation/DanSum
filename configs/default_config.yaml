@@ -6,7 +6,7 @@ n_trials: 20
 n_jobs: 1
 
 project_name: "danewsroom"
-model_checkpoint: "google/mt5-large" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
+model_checkpoint: "/data-big-projects/danish-summarization-danewsroom/models/warm-sponge-384/checkpoint-12907" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
 model_name: "mt5-large-abstractive" # str
 device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
@@ -24,7 +24,7 @@ training_data:
   max_target_length: 128 # int: max reference summary max token length
   quality_filter: True # bool: True or False. If True, will use filtered dataset
   summary_type: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
-  max_eval_samples: 150
+  max_eval_samples: 100
 
 model:
   min_length: 9 # int: min summary length
@@ -33,7 +33,7 @@ model:
   no_repeat_ngram_size: 3 # int: no repeat ngram size
   length_penalty: 5.0 # float: length penalty
   early_stopping: False # bool: early stopping
-  dropout_rate: 0.1 # float: dropout
+  dropout_rate: 0.01 # float: dropout
 
 training:
   output_dir: "/data-big-projects/danish-summarization-danewsroom/models/" # str: output directory
@@ -47,9 +47,9 @@ training:
   logging_steps: 50 # int: log every x steps
   #save_steps: 10000 # int: save every x steps
   #eval_steps: 10000 # int: evaluate every x steps
-  warmup_steps: 2000 # int: warm up steps
+  warmup_steps: 1000 # int: warm up steps
   save_total_limit: 100 # int: number of checkpoints to save
-  num_train_epochs: 10 # int: number of epochs
+  num_train_epochs: 1 # int: number of epochs
   predict_with_generate: True # bool: predict with generate
   fp16: True # bool: use fp16
   load_best_model_at_end: True # bool: load best model at end
@@ -60,15 +60,15 @@ training:
   gradient_accumulation_steps: 2
   #max_steps: 10
 
-hydra:
-  sweeper:
-    params:
-      training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
-      model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
-      training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
-      # training.num_train_epochs: int(interval(1, 10)) # (1, 41)
-      model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
-      model.length_penalty: int(interval(4, 7)) # (4, 10)
-      training.max_grad_norm: int(interval(1, 10))
-      training_data.quality_filter: choice(True, False)
-      training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
+# hydra:
+#   sweeper:
+#     params:
+#       training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
+#       model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
+#       training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
+#       # training.num_train_epochs: int(interval(1, 10)) # (1, 41)
+#       model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
+#       model.length_penalty: int(interval(4, 7)) # (4, 10)
+#       training.max_grad_norm: int(interval(1, 10))
+#       training_data.quality_filter: choice(True, False)
+#       training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])

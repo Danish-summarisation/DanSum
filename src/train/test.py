@@ -1,12 +1,8 @@
 import os
-import time
-import ssl
-from functools import partial
 
 import nltk
 
 import numpy as np
-import pandas as pd
 
 import wandb
 
@@ -19,15 +15,14 @@ from fragments import Fragments
 from datasets import load_dataset
 from transformers import (
     AutoModelForSeq2SeqLM,
-    DataCollatorForSeq2Seq,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
     T5Tokenizer,
 )
 
 from utils import flatten_nested_config
 
 from train import (preprocess_function, generate_summary)
+
+import torch
 
 def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
 
@@ -65,12 +60,6 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
     density = [frag.density() for frag in fragment]
     result["density"] = np.mean(density)
-
-    # add mean generated length
-    prediction_lens = [
-        np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions
-    ]
-    result["gen_len"] = np.mean(prediction_lens)
 
     # round to 4 decimals
     metrics = {k: round(v, 4) for k, v in result.items()} 
@@ -132,16 +121,17 @@ def main(cfg: DictConfig) -> None:
     # subset - delete later!
     # tokenized_datasets['test'] = tokenized_datasets['test'].select(range(cfg.training_data.max_eval_samples))
 
-    tokenizer = T5Tokenizer.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-60000")
-    model = AutoModelForSeq2SeqLM.from_pretrained("/data-big-projects/danish-summarization-danewsroom/models/copper-flower-226/checkpoint-60000")
+    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
+    model = AutoModelForSeq2SeqLM.from_pretrained(cfg.model_checkpoint, num_beams=cfg.model.num_beams) #, num_beam_groups=2, diversity_penalty=2)
 
     results = tokenized_datasets['test'].map(lambda batch: generate_summary(batch, tokenizer, model, cfg), 
         batched=True, 
-        batch_size=16 # cfg.eval_batch_size?
+        batch_size=32 # cfg.eval_batch_size?
         )
     
     metrics = compute_metrics(results['pred'], results['summary'], results['text'], tokenizer, cfg)
-    
+    wandb.log({'eval': metrics})
+
     run.finish()
 
     return metrics
