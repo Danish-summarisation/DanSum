@@ -1,6 +1,5 @@
 '''
 This script contains the code for creating a compressed version of mT5, containing only embeddings for the most used Danish and English vocabulary.
-
 Code adapted from https://gist.github.com/avidale/44cd35bfcdaf8bedf51d97c468cc8001.
 '''
 
@@ -36,10 +35,8 @@ model = AutoModelForSeq2SeqLM.from_pretrained('google/mt5-large')
 
 df_da = pd.read_csv("/data-big-projects/danish-summarization-danewsroom/df_da.csv")
 df_en = pd.read_csv("/data-big-projects/danish-summarization-danewsroom/df_en.csv", usecols=['document'])
-
-df_da = df_da.sample(1000000, random_state=22)
-df_en = df_en.sample(1000000, random_state=22)
-
+# df_da = df_da.sample(1000000, random_state=22)
+# df_en = df_en.sample(1000000, random_state=22)
 cnt_da = Counter()
 for text in tqdm(df_da.text):
    cnt_da.update(tokenizer.encode(text))
@@ -65,10 +62,10 @@ print('Total number of tokenised words across corpora:', total)
 print('Percentage of total model vocabulary:', total/tokenizer.vocab_size*100)
 
 print('Danish top tokens')
-for top in 10_000, 20_000, 30_000:
+for top in 10_000, 20_000, 30_000, 40_000, 50_000, 60_000, 70_000, 80_000, 90_000, 100_000:
     print(top, sum(v for k, v in cnt_da.most_common(top)) / sum(cnt_da.values()))
 print('English top tokens')
-for top in 10_000, 20_000, 30_000:
+for top in 10_000, 20_000, 30_000, 40_000:
     print(top, sum(v for k, v in cnt_en.most_common(top)) / sum(cnt_en.values()))
 
 # removing unused embeddings
@@ -80,11 +77,11 @@ print('English:', tokenizer.convert_ids_to_tokens([k for k, v in cnt_en.most_com
 
 
 new_tokens = set(range(1000))
-for i, (k, v) in enumerate(cnt_en.most_common(10_000)):
+for i, (k, v) in enumerate(cnt_en.most_common(30_000)):
     if k not in new_tokens:
         new_tokens.add(k)
-for i, (k, v) in enumerate(cnt_da.most_common(25_000)):
-    if len(new_tokens) == 29_900:
+for i, (k, v) in enumerate(cnt_da.most_common(115_000)):
+    if len(new_tokens) == 119_900:
         print(i, 'Danish tokens are included')
         break
     if k not in new_tokens:
