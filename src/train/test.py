@@ -75,8 +75,7 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     result["density_mid"] = np.percentile(samples, q, axis=0)[1]
     result["density_high"] = np.percentile(samples, q, axis=0)[2]
 
-    # round to 4 decimals
-    metrics = {k: round(v, 4) for k, v in result.items()} 
+    metrics = result
 
     # log predictions on wandb
     artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
