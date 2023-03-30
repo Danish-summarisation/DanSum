@@ -69,7 +69,7 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
     density = [frag.density() for frag in fragment]
     result["density_mean"] = np.mean(density)
-    samples = np.random.choice(bertscores, 1000)
+    samples = np.random.choice(density, 1000)
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
     result["density_low"] = np.percentile(samples, q, axis=0)[0]
     result["density_mid"] = np.percentile(samples, q, axis=0)[1]
