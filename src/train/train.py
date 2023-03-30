@@ -45,6 +45,7 @@ from transformers import (
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
     T5Tokenizer,
+    AutoTokenizer,
 )
 
 from utils import flatten_nested_config

@@ -6,13 +6,13 @@ n_trials: 20
 n_jobs: 1
 
 project_name: "danewsroom"
-model_checkpoint: "strombergnlp/dant5-small" #### "sarakolding/daT5-base" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
+model_checkpoint: "sarakolding/daT5-base" # str: e.g. "google/mt5-base" or "google/mt5-large" or "google/mt5-xl" or "google/mt5-xxl"
 model_name: "mt5-large-abstractive" # str
 device: "cuda" # str: "cuda" or "cpu"
 language: "da" # str: e.g. "da"
 wandb_mode: "run" # str: "run" or "dryrun"
 wandb_entity: "danish-summarisation" # str:
-cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache_" # str
+cache_dir: "/data-big-projects/danish-summarization-danewsroom/cache_sarak" # str
 redo_cache: False # bool: True or False. If True, will not use cached data
 training_data:
   text_column: "text" # str
@@ -22,41 +22,41 @@ training_data:
   test_path: "/data-big-projects/danish-summarization-danewsroom/test_abstractive_.csv" # str
   max_input_length: 1024 # int:  max text (article) max token length
   max_target_length: 128 # int: max reference summary max token length
-  quality_filter: True #### False? # bool: True or False. If True, will use filtered dataset
+  quality_filter: False # bool: True or False. If True, will use filtered dataset
   summary_type: ["abstractive"] # list of str. Binned density categories for reference summaries included in the dataset
   max_eval_samples: 100
 
 model:
-  min_length: 9 #### None # int: min summary length
-  max_length: 128 #### None # int: max summary length
-  num_beams: 2 #### 4 # int: number of beams for beam search
+  min_length: 0 # int: min summary length
+  max_length: 20 # int: max summary length
+  num_beams: 4 # int: number of beams for beam search
   no_repeat_ngram_size: 3 # int: no repeat ngram size
   length_penalty: 5.0 # float: length penalty
-  early_stopping: False #### True # bool: early stopping
-  dropout_rate: 0.1 #### 0.01 # float: dropout
+  early_stopping: True # bool: early stopping
+  dropout_rate: 0.01 # float: dropout
 training:
   output_dir: "/data-big-projects/danish-summarization-danewsroom/models/" # str: output directory
   overwrite_output_dir: True # bool: overwrite output directory
-  evaluation_strategy: "epoch" # str: "steps" or "epoch"
+  evaluation_strategy: "no" # str: "steps" or "epoch"
   save_strategy: "epoch" # str: "steps" or "epoch"
-  learning_rate: 0.0003 #### 5e-5 # float: learning rate
-  lr_scheduler_type: "polynomial" #### constant # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
-  per_device_train_batch_size: 4 #### 8 # int: batch size
-  per_device_eval_batch_size: 4 #### 8 # int: batch size
+  learning_rate: 5e-5 # float: learning rate
+  lr_scheduler_type: "constant" # str: "linear" or "cosine" or "cosine_with_restarts" or "polynomial" or "constant" or "constant_with_warmup"
+  per_device_train_batch_size: 2 # int: batch size
+  per_device_eval_batch_size: 2 # int: batch size
   logging_steps: 50 # int: log every x steps
   #save_steps: 10000 # int: save every x steps
   #eval_steps: 10000 # int: evaluate every x steps
-  warmup_steps: 1000 #### 2500 # int: warm up steps
+  warmup_steps: 2500 # int: warm up steps
   save_total_limit: 100 # int: number of checkpoints to save
-  num_train_epochs: 10 #### 1 # int: number of epochs
+  num_train_epochs: 1 # int: number of epochs
   predict_with_generate: True # bool: predict with generate
   fp16: True # bool: use fp16
   load_best_model_at_end: True # bool: load best model at end
   metric_for_best_model: "loss" # str: metric for best model
-  pad_to_multiple_of: 8 #### None # int: pad to multiple of
-  max_grad_norm: 5 #### 1 # float
+  pad_to_multiple_of: 8 # int: pad to multiple of
+  max_grad_norm: 1 # float
   include_inputs_for_metrics: True
-  gradient_accumulation_steps: 1 ### 1
+  gradient_accumulation_steps: 1
   #max_steps: 10
   
 # hydra:
