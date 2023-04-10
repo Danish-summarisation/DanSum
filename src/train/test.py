@@ -16,6 +16,7 @@ from datasets import load_dataset
 from transformers import (
     AutoModelForSeq2SeqLM,
     T5Tokenizer,
+    AutoTokenizer,
 )
 
 from utils import flatten_nested_config
