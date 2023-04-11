@@ -17,20 +17,30 @@ This repository contains the code for creating an automatic abstractive summaris
 The model can be used for summarisation of individual news articles using [this notebook](https://github.com/idabh/data-science-exam/blob/main/generate_summary.ipynb), or through the [huggingface API](https://huggingface.co/sarakolding/daT5-summariser).
 
 ### Abstract
-Automatic abstractive text summarisation is a challenging task in the field of natural language processing. This paper aims to further develop and refine previous work by the authors in domain-specific automatic summarisation for Danish news articles. We extend that work by cleaning the data, pruning the vocabulary of a multilingual model, and improving the parameter tuning and model selection, as well as evaluating results using additional metrics.
-We fine-tune a pruned mT5 model on a cleaned subset of the DaNewsroom dataset consisting of abstractive summary-article pairs. The resulting model is evaluated quantitatively using ROUGE, BERTScore and density measures, and qualitatively by comparing the generated summaries to our previous work. We find that though model refinements increase quantitative and qualitative performance, the model is prone to hallucinations, and the resulting ROUGE scores are in the lower range of comparable abstractive summarisation efforts in other languages. A discussion of the limitations of the current evaluation methods for automatic abstractive summarisation underline the need for improved metrics and transparency within the field. Future work could employ methods for detecting and reducing hallucinations in model output, and employ methods for reference-less evaluation of summaries. <br>
+Automatic abstractive text summarization
+is a challenging task in the field of natural language processing. This paper
+presents a model for domain-specific summarization for Danish news articles, DanSumT5; an mT5 model fine-tuned on a
+cleaned subset of the DaNewsroom dataset
+consisting of abstractive summary-article
+pairs. The resulting state-of-the-art model
+is evaluated both quantitatively and qualitatively, using ROUGE and BERTScore
+metrics and human rankings of the summaries. We find that although model refinements increase quantitative and qualitative performance, the model is still prone
+to factual errors. We discuss the limitations of current evaluation methods for automatic abstractive summarization and underline the need for improved metrics and
+transparency within the field. We suggest that future work should employ methods for detecting and reducing errors in
+model output and methods for referenceless evaluation of summaries. <br>
 <br>
 ***Key words:** automatic summarisation, transformers, Danish, natural language processing*
 
-### Model performance
-These are the quantitative results (mean F1 scores) of our model-generated summaries:
+<!-- ### Model performance
+These are the quantitative results of our model-generated summaries:
 
-| Metric  | Result |
-| ------------- | ------------- |
-| **BERTScore**  | 71.41  |
-| **ROUGE-1**  | 23.10 |
-| **ROUGE-2**   | 7.53  |
-| **ROUGE-L**   | 18.52 |
+ADD TABLE HERE
+
+To get a better understanding of the model's performance, we also had two of the authors to blindly (without knowledge of which model generated which summary) rank the model-generated summaries for 100 articles. The results are shown in the table below:
+
+
+Where reference is the original summary.
+-->
 
 
 
