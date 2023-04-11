@@ -25,8 +25,6 @@ import time
 import ssl
 from functools import partial
 
-# from tkinter import E
-
 import nltk
 
 import numpy as np
@@ -46,6 +44,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
+    T5Tokenizer,
     AutoTokenizer,
 )
 
@@ -78,14 +77,14 @@ def generate_summary(batch, tokenizer, model, cfg):
         batch["text"],
         padding="max_length",
         return_tensors="pt",
-        max_length=cfg.training.max_input_length,
+        max_length=cfg.training_data.max_input_length,
         truncation=True,
     )
     input_ids = inputs.input_ids.to(cfg.device)
     attention_mask = inputs.attention_mask.to(cfg.device)
 
     # make the model generate predictions (summaries) for articles in text set
-    outputs = model.generate(input_ids, attention_mask=attention_mask)
+    outputs = model.to(cfg.device).generate(input_ids, attention_mask=attention_mask)
 
     # all special tokens will be removed
     output_str = tokenizer.batch_decode(outputs, skip_special_tokens=True)
@@ -120,7 +119,7 @@ def compute_metrics(eval_pred, tokenizer, cfg):
         "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels
     ]
     decoded_inputs = [
-        "\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_inputs
+        "\n".join(nltk.sent_tokenize(input.strip())) for input in decoded_inputs
     ]
 
     # compute ROUGE scores
@@ -131,7 +130,13 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     bertscores = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language
     )
-    result["bertscore"] = np.mean(bertscores["precision"])
+    result["bertscore"] = np.mean(bertscores["f1"])
+
+    # compute BERTScores
+    bertscores_r = bert_metric.compute(
+        predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
+    )
+    result["bertscore_r"] = np.mean(bertscores_r["f1"])
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
@@ -146,6 +151,12 @@ def compute_metrics(eval_pred, tokenizer, cfg):
 
     # round to 4 decimals
     metrics = {k: round(v, 4) for k, v in result.items()}
+
+    # log predictions on wandb
+    artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
+    summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
+    artifact.add(summary_table, "summaries")
+    wandb.run.log_artifact(artifact)      
 
     return metrics
 
@@ -192,7 +203,7 @@ def main(cfg: DictConfig) -> None:
 
     # Preprocessing
     # removed fast because of warning message
-    tokenizer = AutoTokenizer.from_pretrained(cfg.model_checkpoint)
+    tokenizer = T5Tokenizer.from_pretrained(cfg.model_checkpoint)
 
     # make the tokenized datasets using the preprocess function
     tokenized_datasets = dataset.map(
@@ -238,8 +249,8 @@ def main(cfg: DictConfig) -> None:
         per_device_train_batch_size=cfg.training.per_device_train_batch_size,
         per_device_eval_batch_size=cfg.training.per_device_eval_batch_size,
         logging_steps=cfg.training.logging_steps,
-        save_steps=cfg.training.save_steps,
-        eval_steps=cfg.training.eval_steps,
+        #save_steps=cfg.training.save_steps,
+        #eval_steps=cfg.training.eval_steps,
         warmup_steps=cfg.training.warmup_steps,
         save_total_limit=cfg.training.save_total_limit,
         num_train_epochs=cfg.training.num_train_epochs,
@@ -250,7 +261,8 @@ def main(cfg: DictConfig) -> None:
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
-        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps
+        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps,
+        # max_steps=cfg.training.max_steps
     )
 
     # pad the articles and ref summaries (with -100) to max input length
@@ -265,6 +277,8 @@ def main(cfg: DictConfig) -> None:
         args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["validation"],
+        # limit eval dataset
+        # eval_dataset = tokenized_datasets["validation"].select(range(cfg.training_data.max_eval_samples)),
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=_compute_metrics,
