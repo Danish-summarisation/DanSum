@@ -20,6 +20,10 @@ df_ratings['1st place'] = [None] * 100
 df_ratings['2nd place'] = [None] * 100
 df_ratings['3rd place'] = [None] * 100
 df_ratings['4th place'] = [None] * 100
+df_ratings['5th place'] = [None] * 100
+
+# %%
+df_rating = pd.read_csv('ratings_Katrine.csv', sep=',', header=0)
 
 # %% Loop manually through texts
 # NB: Open the text editor to see full text and summaries if they are too long to be shown (link at the beginning of the output)
@@ -30,7 +34,7 @@ df_ratings['4th place'] = [None] * 100
 # This is the case if there is no new output and the code is shown to be running at start and not complete. 
 # Then just try again. 
 # You can always overwrite you current answer by running the code again without changing i
-i = 1
+i = 46 # start with i = 0
 print("Tekst", i)
 print(df['texts'][i])
 print(" ")
@@ -47,34 +51,13 @@ print(" ")
 print("Resume 4")
 print(df['d'][i]) 
 print(" ")
-print("// Press a, b, c or d to select the best summary in your opinion for 1st place, 2nd, 3rd and 4th place")
-for column in df_ratings:
-    print("// Choose the", column)
-    while True:
-        if keyboard.read_key() == "a":
-            print(" ")
-            print("You pressed 'a'.")
-            df_ratings[column][i]= "a"
-            print("Increase i by 1 and run code chunk again")
-            break
-        elif keyboard.read_key() == "b":
-            print(" ")
-            print("You pressed 'b'.")
-            df_ratings[column][i] = "b"
-            print("Increase i by 1 and run code chunk again")
-            break
-        elif keyboard.read_key() == "c":
-            print(" ")
-            print("You pressed 'c'.")
-            df_ratings[column][i] = "c"
-            print("Increase i by 1 and run code chunk again")
-            break
-        elif keyboard.read_key() == "d":
-            print(" ")
-            print("You pressed 'd'.")
-            df_ratings[column][i] = "d"
-            print("// Increase i by 1 and run code chunk again")
-            break
+print("Resume 5")
+print(df['e'][i]) 
+print(" ")
+print("// Press a, b, c, d or e to select the best summary in your opinion for 1st place, 2nd, 3rd and 4th place")
+
+print("Use this to alter the ratings df_ratings[i:i+1] = ["", "", "", "", ""]")
+print("// Increase i by 1 and run code chunk again")
 
 # In the end when i == 99 
 # Check that you have a rating in each element of the list "ratings"
@@ -82,4 +65,6 @@ for column in df_ratings:
 
 #%% Save ratings as a new column to the csv file
 # If you are working over time, maybe save the work as you go and then just check how far you are and load in this df that was saved and continue but remember to not loose your ratings but add thos in yourself
-df_ratings.to_csv('ratings_yourName.csv')
+df_ratings.to_csv('ratings_Katrine2.csv')
+
+# %%
