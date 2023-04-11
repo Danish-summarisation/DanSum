@@ -56,6 +56,5 @@ Sara Kolding - sarakolding@live.dk
 Katrine Nymann - katrinesofienm@hotmail.dk
 
 ## Acknowledgments
-* Thank you to Daniel Varab for providing us with access to DaNewsroom
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
 
