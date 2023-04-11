@@ -3,9 +3,6 @@
     <img src="data/DALL·E 2022-05-31 16.23.40.png" alt="Logo" width="80" height="80">
 <h2 align="center">Automatic Abstractive Summarisation in Danish</h3>
 
-  <p align="center">
-    Data Science Exam - MSc Cognitive Science at Aarhus University - Spring 2022
-  <br />
   <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a> & <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em>
   <br />
     <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
