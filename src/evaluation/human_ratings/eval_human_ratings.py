@@ -1,11 +1,11 @@
 import pandas as pd
-from statistics import (median, mode, mean)
+from statistics import median, mode, mean
 from scipy.stats import bootstrap
 
-kat = pd.read_csv('ratings_Katrine.csv', sep = ";").drop("Unnamed: 0", axis = 1)
-ida = pd.read_csv('ratings_Ida.csv', sep = ';').drop("example", axis = 1)
-kat.columns = ['1', '2', '3', '4', '5']
-ida.columns = ['1', '2', '3', '4', '5']
+kat = pd.read_csv("ratings_Katrine.csv", sep=";").drop("Unnamed: 0", axis=1)
+ida = pd.read_csv("ratings_Ida.csv", sep=";").drop("example", axis=1)
+kat.columns = ["1", "2", "3", "4", "5"]
+ida.columns = ["1", "2", "3", "4", "5"]
 
 # Kat data
 # Transpose data
@@ -17,7 +17,7 @@ for index, row in kat.iterrows():
             transposed_data[val] = []
         transposed_data[val].append(col + 1)
 
-df_kat = pd.DataFrame.from_dict(transposed_data, orient='columns')
+df_kat = pd.DataFrame.from_dict(transposed_data, orient="columns")
 
 df_kat = df_kat.drop(columns="e")
 
@@ -31,14 +31,23 @@ def shift_rankings(row):
         mapping[val] = i + 1
     # Apply the mapping to the row
     return row.map(mapping)
+
+
 # Apply the function to each row of the dataframe
 df_kat = df_kat.apply(shift_rankings, axis=1)
 
-#reorder columns
-df_kat = df_kat[['a', 'b', 'c', "d"]]
+# reorder columns
+df_kat = df_kat[["a", "b", "c", "d"]]
 
 # rename columns
-df_kat = df_kat.rename(columns = {"a": "Reference", "b": "DanSum_large", "c": "DanSum_small", "d": "DanSum_base"})
+df_kat = df_kat.rename(
+    columns={
+        "a": "Reference",
+        "b": "DanSum_large",
+        "c": "DanSum_small",
+        "d": "DanSum_base",
+    }
+)
 
 # Ida
 # Transpose data
@@ -50,7 +59,7 @@ for index, row in ida.iterrows():
             transposed_data[val] = []
         transposed_data[val].append(col + 1)
 
-df_ida = pd.DataFrame.from_dict(transposed_data, orient='columns')
+df_ida = pd.DataFrame.from_dict(transposed_data, orient="columns")
 
 df_ida = df_ida.drop(columns="e")
 
@@ -64,14 +73,23 @@ def shift_rankings(row):
         mapping[val] = i + 1
     # Apply the mapping to the row
     return row.map(mapping)
+
+
 # Apply the function to each row of the dataframe
 df_ida = df_ida.apply(shift_rankings, axis=1)
 
-#reorder columns
-df_ida = df_ida[['a', 'b', 'c', "d"]]
+# reorder columns
+df_ida = df_ida[["a", "b", "c", "d"]]
 
 # rename columns
-df_ida = df_ida.rename(columns = {"a": "Reference", "b": "DanSum_large", "c": "DanSum_small", "d": "DanSum_base"})
+df_ida = df_ida.rename(
+    columns={
+        "a": "Reference",
+        "b": "DanSum_large",
+        "c": "DanSum_small",
+        "d": "DanSum_base",
+    }
+)
 
 # Now dataframes are ready for the appendix
 df_kat.to_csv("ratings_kat_cleaned.csv")
@@ -111,41 +129,55 @@ df_ida.to_csv("ratings_ida_cleaned.csv")
 ##### Interrater reliability
 
 # Change into bolean df
-df_kat2 = df_kat.rename(columns = {"Reference": "a", "DanSum_large": "b", "DanSum_small": "c", "DanSum_base": "d"})
-df_ida2 = df_ida.rename(columns = {"Reference": "a", "DanSum_large": "b", "DanSum_small": "c", "DanSum_base": "d"})
+df_kat2 = df_kat.rename(
+    columns={
+        "Reference": "a",
+        "DanSum_large": "b",
+        "DanSum_small": "c",
+        "DanSum_base": "d",
+    }
+)
+df_ida2 = df_ida.rename(
+    columns={
+        "Reference": "a",
+        "DanSum_large": "b",
+        "DanSum_small": "c",
+        "DanSum_base": "d",
+    }
+)
 
 relation = ["a>b", "a>c", "a>d", "b>c", "b>d", "c>d"]
-relation_list = relation*len(df_kat2)
+relation_list = relation * len(df_kat2)
 
 bool_list = []
 for index, row in df_kat2.iterrows():
     # a > b
-    if row[0]<row[1]:
+    if row[0] < row[1]:
         bool_list.append(1)
     else:
         bool_list.append(0)
         # a > c
-    if row[0]<row[2]:
+    if row[0] < row[2]:
         bool_list.append(1)
     else:
         bool_list.append(0)
-            # a > d
-    if row[0]<row[3]:
+        # a > d
+    if row[0] < row[3]:
         bool_list.append(1)
     else:
         bool_list.append(0)
-                # b > c
-    if row[1]<row[2]:
+        # b > c
+    if row[1] < row[2]:
         bool_list.append(1)
     else:
         bool_list.append(0)
-                    # b > d
-    if row[1]<row[3]:
+        # b > d
+    if row[1] < row[3]:
         bool_list.append(1)
     else:
         bool_list.append(0)
         # c > d
-    if row[2]<row[3]:
+    if row[2] < row[3]:
         bool_list.append(1)
     else:
         bool_list.append(0)
@@ -154,32 +186,32 @@ for index, row in df_kat2.iterrows():
 bool_list2 = []
 for index, row in df_ida2.iterrows():
     # a > b
-    if row[0]<row[1]:
+    if row[0] < row[1]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
         # a > c
-    if row[0]<row[2]:
+    if row[0] < row[2]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
-            # a > d
-    if row[0]<row[3]:
+        # a > d
+    if row[0] < row[3]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
-                # b > c
-    if row[1]<row[2]:
+        # b > c
+    if row[1] < row[2]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
-                    # b > d
-    if row[1]<row[3]:
+        # b > d
+    if row[1] < row[3]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
         # c > d
-    if row[2]<row[3]:
+    if row[2] < row[3]:
         bool_list2.append(1)
     else:
         bool_list2.append(0)
@@ -192,16 +224,21 @@ text = []
 for id in ids:
     rows = []
     for i in range(6):
-        row = id # example data
+        row = id  # example data
         rows.append(row)
     text.extend(rows)
-data = {"text": text, "relation": relation_list, "rater1":bool_list, "rater2": bool_list2}
+data = {
+    "text": text,
+    "relation": relation_list,
+    "rater1": bool_list,
+    "rater2": bool_list2,
+}
 df = pd.DataFrame(data)
-
 
 
 rater1 = df["rater1"]
 rater2 = df["rater2"]
+
 
 def interrater(rater1, rater2):
     counts = [0] * len(rater2)
@@ -214,10 +251,11 @@ def interrater(rater1, rater2):
         if rater1[i] == rater2[i]:
             counts[i] += 1
 
-    return sum(counts)/len(rater1)
+    return sum(counts) / len(rater1)
+
 
 print(interrater(rater1, rater2))
 
 # Bootstrap
-res = bootstrap((rater1,rater2),interrater, paired=True, vectorized=False)
+res = bootstrap((rater1, rater2), interrater, paired=True, vectorized=False)
 print(res)

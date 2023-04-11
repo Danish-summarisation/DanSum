@@ -134,12 +134,18 @@ def compute_metrics(eval_pred, tokenizer, cfg):
 
     # compute BERTScores
     bertscores_r = bert_metric.compute(
-        predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
+        predictions=decoded_preds,
+        references=decoded_labels,
+        lang=cfg.language,
+        model_type="xlm-roberta-large",
     )
     result["bertscore_r"] = np.mean(bertscores_r["f1"])
 
     # compute density
-    fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
+    fragment = [
+        Fragments(decoded_pred, decoded_input, lang=cfg.language)
+        for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)
+    ]
     density = [frag.density() for frag in fragment]
     result["density"] = np.mean(density)
 
@@ -154,9 +160,15 @@ def compute_metrics(eval_pred, tokenizer, cfg):
 
     # log predictions on wandb
     artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
-    summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
+    summary_table = wandb.Table(
+        columns=["references", "predictions"],
+        data=[
+            [ref, pred]
+            for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])
+        ],
+    )
     artifact.add(summary_table, "summaries")
-    wandb.run.log_artifact(artifact)      
+    wandb.run.log_artifact(artifact)
 
     return metrics
 
@@ -221,10 +233,14 @@ def main(cfg: DictConfig) -> None:
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "mixed")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "mixed"
+        )
 
     if "extractive" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "extractive")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "extractive"
+        )
 
     # Fine-tuning
     # load the pretrained mT5 model from the Huggingface hub
@@ -249,15 +265,15 @@ def main(cfg: DictConfig) -> None:
         per_device_train_batch_size=cfg.training.per_device_train_batch_size,
         per_device_eval_batch_size=cfg.training.per_device_eval_batch_size,
         logging_steps=cfg.training.logging_steps,
-        #save_steps=cfg.training.save_steps,
-        #eval_steps=cfg.training.eval_steps,
+        # save_steps=cfg.training.save_steps,
+        # eval_steps=cfg.training.eval_steps,
         warmup_steps=cfg.training.warmup_steps,
         save_total_limit=cfg.training.save_total_limit,
         num_train_epochs=cfg.training.num_train_epochs,
         predict_with_generate=cfg.training.predict_with_generate,
         overwrite_output_dir=cfg.training.overwrite_output_dir,
         fp16=cfg.training.fp16,
-        #load_best_model_at_end=cfg.training.load_best_model_at_end,
+        # load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,

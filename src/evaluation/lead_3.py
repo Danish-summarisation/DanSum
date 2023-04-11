@@ -12,6 +12,7 @@ from typing import Any, Dict, List, MutableMapping, Tuple, Union
 
 nltk.download("punkt")
 
+
 def flatten_nested_config(
     config: Union[Dict, MutableMapping],
     parent_key: str = "",
@@ -56,7 +57,9 @@ def compute_metrics(decoded_preds, decoded_labels, decoded_inputs, cfg):
     bert_metric = datasets.load_metric("bertscore")
 
     # compute ROUGE scores
-    rouge = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels, use_aggregator=True)
+    rouge = rouge_metric.compute(
+        predictions=decoded_preds, references=decoded_labels, use_aggregator=True
+    )
     mid = {f"{key}_mid": value.mid.fmeasure for key, value in rouge.items()}
     low = {f"{key}_low": value.low.fmeasure for key, value in rouge.items()}
     high = {f"{key}_high": value.high.fmeasure for key, value in rouge.items()}
@@ -70,7 +73,10 @@ def compute_metrics(decoded_preds, decoded_labels, decoded_inputs, cfg):
 
     # compute BERTScores
     bertscores = bert_metric.compute(
-        predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
+        predictions=decoded_preds,
+        references=decoded_labels,
+        lang=cfg.language,
+        model_type="xlm-roberta-large",
     )
     result["bertscore_mean"] = np.mean(bertscores["f1"])
     samples = np.random.choice(bertscores["f1"], 1000)
@@ -81,7 +87,10 @@ def compute_metrics(decoded_preds, decoded_labels, decoded_inputs, cfg):
     result["bertscore_high"] = np.percentile(samples, q, axis=0)[2]
 
     # compute density
-    fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
+    fragment = [
+        Fragments(decoded_pred, decoded_input, lang=cfg.language)
+        for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)
+    ]
     density = [frag.density() for frag in fragment]
     result["density_mean"] = np.mean(density)
     samples = np.random.choice(density, 1000)
@@ -90,13 +99,19 @@ def compute_metrics(decoded_preds, decoded_labels, decoded_inputs, cfg):
     result["density_mid"] = np.percentile(samples, q, axis=0)[1]
     result["density_high"] = np.percentile(samples, q, axis=0)[2]
 
-    metrics = result 
+    metrics = result
 
     # log predictions on wandb
     artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
-    summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
+    summary_table = wandb.Table(
+        columns=["references", "predictions"],
+        data=[
+            [ref, pred]
+            for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])
+        ],
+    )
     artifact.add(summary_table, "summaries")
-    wandb.run.log_artifact(artifact)      
+    wandb.run.log_artifact(artifact)
 
     return metrics
 
@@ -118,14 +133,14 @@ def main(cfg: DictConfig) -> None:
     )
 
     dataset = load_dataset(
-            "csv",
-            data_files={
-                #"train": cfg.training_data.train_path,
-                #"validation": cfg.training_data.val_path,
-                "test": cfg.training_data.test_path
-            },
-            cache_dir=cfg.cache_dir,
-        )
+        "csv",
+        data_files={
+            # "train": cfg.training_data.train_path,
+            # "validation": cfg.training_data.val_path,
+            "test": cfg.training_data.test_path
+        },
+        cache_dir=cfg.cache_dir,
+    )
 
     if cfg.training_data.quality_filter:
         dataset = dataset.filter(lambda x: x["passed"] is True)
@@ -133,13 +148,14 @@ def main(cfg: DictConfig) -> None:
 
     results = dataset["test"]
     results = results.map(three_sentence_summary)
-    
+
     metrics = compute_metrics(results["pred"], results["summary"], results["text"], cfg)
     wandb.log({"eval": metrics})
 
     run.finish()
 
     return metrics
+
 
 if __name__ == "__main__":
     main()
