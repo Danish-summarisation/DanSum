@@ -5,8 +5,6 @@ This script contains the code for finetuning a pretrained mT5 model for summaris
 import time
 
 import datasets
-
-################################ Importing modules ################################
 import nltk
 import numpy as np
 import pandas as pd
@@ -212,8 +210,6 @@ label_str = results["summary"]  # actual ref summary from test set
 rouge_output = metric.compute(predictions=pred_str, references=label_str)
 
 # save predictions and rouge scores on test set
-from numpy import save
-
 np.save("./" + timestr + "_preds.npy", results)
 np.save("./" + timestr + "_rouge.npy", rouge_output)
 

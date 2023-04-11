@@ -16,8 +16,6 @@ from spacy.lang.da import Danish
 from spacy.lang.ar import Arabic
 from spacy.lang.ru import Russian
 
-from os import system as _system
-
 LANGUAGES = {
     "ar": Arabic,
     "da": Danish,

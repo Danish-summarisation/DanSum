@@ -3,14 +3,13 @@ This script contains the code for creating a compressed version of mT5, containi
 Code adapted from https://gist.github.com/avidale/44cd35bfcdaf8bedf51d97c468cc8001.
 """
 
-# run git lfs install from terminal
-
-from transformers import T5Tokenizer, AutoModelForSeq2SeqLM
-from datasets import load_dataset
-import torch
-import pandas as pd
 from collections import Counter
+
+import pandas as pd
+import sentencepiece_model_pb2 as spmp
+import torch
 from tqdm.auto import tqdm, trange
+from transformers import AutoModelForSeq2SeqLM, T5Tokenizer
 
 # loading model and tokeniser
 tokenizer = T5Tokenizer.from_pretrained("google/mt5-large")
@@ -131,7 +130,6 @@ model.lm_head.weight = new_head.weight
 
 #!protoc -I=. --python_out=. src/model/sentencepiece_model.proto
 
-import sentencepiece_model_pb2 as spmp
 
 smp = tokenizer.sp_model.serialized_model_proto()
 m = spmp.ModelProto()

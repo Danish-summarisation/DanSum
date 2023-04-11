@@ -3,14 +3,12 @@ This script preprocesses the data from the DaNewsroom data sets.
 Applying cutoffs, filtering out the abstractive data and saving the data files.
 """
 # %% Load modules
+import datasets
+import numpy as np
 import pandas as pd
 from datasets import Dataset, load_dataset
-import datasets
-from transformers import BertTokenizerFast, T5TokenizerFast
-from transformers import AutoTokenizer
-import numpy as np
-import matplotlib.pyplot as plt
 from ftfy import fix_text
+from transformers import AutoTokenizer, T5TokenizerFast
 
 
 def preprocess_function(examples):
