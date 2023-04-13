@@ -31,16 +31,20 @@ model output and methods for referenceless evaluation of summaries. <br>
 <br>
 ***Key words:** automatic summarisation, transformers, Danish, natural language processing*
 
-<!-- ### Model performance
+### Model performance
 These are the quantitative results of our model-generated summaries:
 
-ADD TABLE HERE
+| Model | BERTScore | ROUGE-1 | ROUGE-2 | ROUGE-L |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-small"> **DanSum-mT5-small** </a> | x  | x  | x  | x  |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-base"> **DanSum-mT5-base** | x  | x  | x  | x  |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-large"> **DanSum-mT5-large** | x  | x  | x  | x  |
 
 To get a better understanding of the model's performance, we also had two of the authors to blindly (without knowledge of which model generated which summary) rank the model-generated summaries for 100 articles. The results are shown in the table below:
 
 
 Where reference is the original summary.
--->
+
 
 
 
