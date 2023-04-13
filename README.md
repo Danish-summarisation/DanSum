@@ -3,7 +3,7 @@
     <img src="data/DALL·E 2022-05-31 16.23.40.png" alt="Logo" width="80" height="80">
 <h2 align="center">Automatic Abstractive Summarisation in Danish</h3>
 
-  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a> & <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em>
+  <em><a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a>, <a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a>, <a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong></a> & <a href="https://github.com/rdkm89"><strong>Ross Deans Kristensen-McLachlan</strong></a></em>
   <br />
     <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
     <br />
