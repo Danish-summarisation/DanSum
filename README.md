@@ -1,7 +1,7 @@
 <div id="top"></div>
 <div align="center">
     <img src="data/logo_DanSumT5.png" alt="Logo" width="70" height="70">
-<h2 align="center">Automatic Abstractive Summarisation in Danish</h3>
+<h2 align="center">DanSumT5: Automatic Abstractive Summarisation in Danish</h3>
 
   <em><a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a>, <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a>, <a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong></a> & <a href="https://github.com/rdkm89"><strong>Ross Deans Kristensen-McLachlan</strong></a></em>
   <br />
