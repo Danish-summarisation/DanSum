@@ -62,7 +62,7 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     
     for i in range(1000):
       sample_idx = np.random.choice(
-          np.arange(len(bertscores["f1"]), size=len(bertscores["f1"]))
+          np.arange(bertscores["f1"].shape[0]), size=bertscores["f1"].shape[0]) # make bertscores f1 into matrix?
       sample = bertscores["f1"][sample_idx, :]
       sample_mean[i, :] = np.mean(sample, axis=0)
     
