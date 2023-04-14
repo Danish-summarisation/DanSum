@@ -59,12 +59,18 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
     )
     result["bertscore_mean"] = np.mean(bertscores["f1"])
-    samples = np.random.choice(bertscores["f1"], 1000)
+    
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(bertscores["f1"]), size=len(bertscores["f1"]))
+      sample = bertscores["f1"][sample_idx, :]
+      sample_mean[i, :] = np.mean(sample, axis=0)
+    
     percentile_delta = (1 - 0.95) / 2
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
-    result["bertscore_low"] = np.percentile(samples, q, axis=0)[0]
-    result["bertscore_mid"] = np.percentile(samples, q, axis=0)[1]
-    result["bertscore_high"] = np.percentile(samples, q, axis=0)[2]
+    result["bertscore_low"] = np.percentile(sample_mean, q, axis=0)[0]
+    result["bertscore_mid"] = np.percentile(sample_mean, q, axis=0)[1]
+    result["bertscore_high"] = np.percentile(sample_mean, q, axis=0)[2]
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
