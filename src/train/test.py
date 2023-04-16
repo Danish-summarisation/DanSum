@@ -42,45 +42,49 @@ def compute_metrics(predictions, labels, inputs, tokenizer, cfg):
     ]
 
     # compute ROUGE scores
-    rouge = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels, use_aggregator=True)
-    mid = {f"{key}_mid": value.mid.fmeasure for key, value in rouge.items()}
-    low = {f"{key}_low": value.low.fmeasure for key, value in rouge.items()}
-    high = {f"{key}_high": value.high.fmeasure for key, value in rouge.items()}
-    result = {"low": low, "mid": mid, "high": high}
-
-    # # compute BERTScores
-    # bertscores = bert_metric.compute(
-    #     predictions=decoded_preds, references=decoded_labels, lang=cfg.language
-    # )
-    # result["bertscore"] = np.mean(bertscores["f1"])
+    # rouge = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels, use_aggregator=True)
+    # mid = {f"{key}_mid": value.mid.fmeasure for key, value in rouge.items()}
+    # low = {f"{key}_low": value.low.fmeasure for key, value in rouge.items()}
+    # high = {f"{key}_high": value.high.fmeasure for key, value in rouge.items()}
+    # result = {"low": low, "mid": mid, "high": high}
 
     # compute BERTScores
     bertscores = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
     )
-    result["bertscore_mean"] = np.mean(bertscores["f1"])
-    
+    mean_bertscore = [None] * 1000
+
     for i in range(1000):
       sample_idx = np.random.choice(
-          np.arange(bertscores["f1"].shape[0]), size=bertscores["f1"].shape[0]) # make bertscores f1 into matrix?
-      sample = bertscores["f1"][sample_idx, :]
-      sample_mean[i, :] = np.mean(sample, axis=0)
+          np.arange(len(bertscores["f1"])), size=len(bertscores["f1"]))
+      sample = [bertscores["f1"][x] for x in sample_idx]
+      mean_bertscore[i] = np.mean(sample)
     
     percentile_delta = (1 - 0.95) / 2
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
-    result["bertscore_low"] = np.percentile(sample_mean, q, axis=0)[0]
-    result["bertscore_mid"] = np.percentile(sample_mean, q, axis=0)[1]
-    result["bertscore_high"] = np.percentile(sample_mean, q, axis=0)[2]
+    result["bertscore_low"] = np.percentile(mean_bertscore, q)[0]
+    result["bertscore_mid"] = np.percentile(mean_bertscore, q)[1]
+    result["bertscore_high"] = np.percentile(mean_bertscore, q)[2]
+    result["bertscore_mean"] = np.mean(bertscores["f1"])
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
     density = [frag.density() for frag in fragment]
-    result["density_mean"] = np.mean(density)
-    samples = np.random.choice(density, 1000)
+    
+    mean_density = [None] * 1000
+
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(density)), size=len(density))
+      sample = [density[x] for x in sample_idx]
+      mean_density[i] = np.mean(sample)
+    
+    percentile_delta = (1 - 0.95) / 2
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
-    result["density_low"] = np.percentile(samples, q, axis=0)[0]
-    result["density_mid"] = np.percentile(samples, q, axis=0)[1]
-    result["density_high"] = np.percentile(samples, q, axis=0)[2]
+    result["density_low"] = np.percentile(mean_density, q)[0]
+    result["density_mid"] = np.percentile(mean_density, q)[1]
+    result["density_high"] = np.percentile(mean_density, q)[2]
+    result["density_mean"] = np.mean(density)
 
     metrics = result
 
