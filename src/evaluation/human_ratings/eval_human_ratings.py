@@ -74,9 +74,8 @@ df_ida = df_ida[['a', 'b', 'c', "d"]]
 df_ida = df_ida.rename(columns = {"a": "Reference", "b": "DanSum_large", "c": "DanSum_small", "d": "DanSum_base"})
 
 # Now dataframes are ready for the appendix
-df_kat.to_csv("ratings_kat_cleaned.csv")
-df_ida.to_csv("ratings_ida_cleaned.csv")
-#
+df_kat.to_csv("../../../data/ratings_kat_cleaned.csv")
+df_ida.to_csv("../../../data/ratings_ida_cleaned.csv")
 
 # both = pd.concat([df_kat, df_ida])
 
