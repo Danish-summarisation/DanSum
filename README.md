@@ -26,12 +26,12 @@ Automatic abstractive text summarization is a challenging task in the field of n
 ### Model performance
 These are the quantitative results (mean F1 scores) of our model-generated summaries:
 
-| Metric  | Result |
+| Metric  | DanSumT5_large |
 | ------------- | ------------- |
-| **BERTScore**  | 71.41  |
-| **ROUGE-1**  | 23.10 |
-| **ROUGE-2**   | 7.53  |
-| **ROUGE-L**   | 18.52 |
+| **BERTScore**  | 88.97 [88.95, 89.00] |
+| **ROUGE-1**  | 23.76 |
+| **ROUGE-2**   | 7.46  |
+| **ROUGE-L**   | 18.25 |
 
 
 
