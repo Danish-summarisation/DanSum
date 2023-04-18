@@ -1,12 +1,12 @@
 <div id="top"></div>
 <div align="center">
-    <img src="data/DALL·E 2022-05-31 16.23.40.png" alt="Logo" width="80" height="80">
-<h2 align="center">Automatic Abstractive Summarisation in Danish</h3>
-
+    
+<h2 align="center">Automatic Abstractive Summarisation in Danish</h2>
+<h3 align="center">NoDaLiDa 2023 Conference Submission</h2>
   <p align="center">
-    Data Science Exam - MSc Cognitive Science at Aarhus University - Spring 2022
-  <br />
-  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a> & <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em>
+  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a><a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em><a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong>& <strong>Ross Deans Kristensen-McLachlan</strong>
+  
+  Ross Deans Kristensen-McLachlan
   <br />
     <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
     <br />
@@ -41,7 +41,7 @@ These are the quantitative results (mean F1 scores) of our model-generated summa
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
 * Clone the repo
    ```sh
-   git clone https://github.com/idabh/data-science-exam
+   git clone https://github.com/Danish-summarisation/DanSum.git
    ```
 * Install required modules
   ```sh
@@ -57,5 +57,5 @@ Katrine Nymann - katrinesofienm@hotmail.dk
 
 ## Acknowledgments
 * Thank you to Daniel Varab for providing us with access to DaNewsroom
-*  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
+
 
