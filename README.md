@@ -4,7 +4,7 @@
 <h2 align="center">Automatic Abstractive Summarisation in Danish</h2>
 <h3 align="center">NoDaLiDa 2023 Conference Submission</h2>
   <p align="center">
-  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a><a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em><a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong>& <strong>Ross Deans Kristensen-McLachlan</strong>
+  <em><a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a>, <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a></em>, <a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong> & <strong>Ross Deans Kristensen-McLachlan</strong>
   
   Ross Deans Kristensen-McLachlan
   <br />
