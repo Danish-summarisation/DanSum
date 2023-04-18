@@ -29,11 +29,9 @@ These are the quantitative results (mean F1 scores) of our model-generated summa
 | Metric  | DanSumT5_large |
 | ------------- | ------------- |
 | **BERTScore**  | 88.97 [88.95, 89.00] |
-| **ROUGE-1**  | 23.76 |
-| **ROUGE-2**   | 7.46  |
-| **ROUGE-L**   | 18.25 |
-
-
+| **ROUGE-1**  | 23.76 [23.60, 23.91] |
+| **ROUGE-2**   | 7.46 [7.35, 7.59]  |
+| **ROUGE-L**   | 18.25 [18.12, 18.97]|
 
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
