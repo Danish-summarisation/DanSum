@@ -1,2 +1,9 @@
 # MacOS
 .DS_Store
+
+hydra
+*.log
+outputs
+wandb
+
+__pycache__
