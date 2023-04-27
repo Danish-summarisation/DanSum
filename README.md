@@ -59,12 +59,21 @@ Where reference is the original summary.
   pip install -r requirements.txt
   ```
 
-├── src
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-
+    
+## Project organisation
+├── README.md          <- The top-level README for developers using this project.
+├── src                <- Source code for use in this project.       <- A default Sphinx project; see sphinx-doc.
+│   ├── __init__.py    <- Makes src a Python module
+│   ├── forced_admissions_cohort.py    <- Script that generates data frames for projects
+│   │
+│   ├── loaders           <- Scripts to load in data from SQL database
+│   │   └── load_data_function.py
+│   │
+│   └── writers.py  <- Scripts to create exploratory and results oriented visualizations
+│
+├──  requirements.txt
+                                  
+                           
 ## Acknowledgments
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
 
