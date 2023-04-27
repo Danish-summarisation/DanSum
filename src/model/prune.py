@@ -16,28 +16,27 @@ tokenizer = T5Tokenizer.from_pretrained("google/mt5-large")
 model = AutoModelForSeq2SeqLM.from_pretrained("google/mt5-large")
 
 # loading and preparing corpora
-# da_gigaword = load_dataset("DDSC/dagw_reddit_filtered_v1.0.0")
-# en_gigaword = load_dataset("gigaword")
-# danewsroom = pd.read_csv("/data-big-projects/danish-summarization-danewsroom/train_all_.csv")
-# danewsroom = danewsroom[['text']][danewsroom['passed'] == True]
+da_gigaword = load_dataset("DDSC/dagw_reddit_filtered_v1.0.0")
+en_gigaword = load_dataset("gigaword")
+danewsroom = pd.read_csv("/data-big-projects/danish-summarization-danewsroom/train_all_.csv")
+danewsroom = danewsroom[['text']][danewsroom['passed'] == True]
 
-# df_en_train = pd.DataFrame(en_gigaword['train'])
-# df_en_val = pd.DataFrame(en_gigaword['validation'])
-# df_en_test = pd.DataFrame(en_gigaword['test'])
-# df_en = pd.concat([df_en_train, df_en_val, df_en_test])
+df_en_train = pd.DataFrame(en_gigaword['train'])
+df_en_val = pd.DataFrame(en_gigaword['validation'])
+df_en_test = pd.DataFrame(en_gigaword['test'])
+df_en = pd.concat([df_en_train, df_en_val, df_en_test])
 
 
-# df_da_gigaword = pd.DataFrame(da_gigaword['train'])
-# df_da_gigaword = df_da_gigaword[['text']][df_da_gigaword['is_13_gram_duplicate'].notna()]
+df_da_gigaword = pd.DataFrame(da_gigaword['train'])
+df_da_gigaword = df_da_gigaword[['text']][df_da_gigaword['is_13_gram_duplicate'].notna()]
 
-# df_da = pd.concat([df_da_gigaword, danewsroom])
+df_da = pd.concat([df_da_gigaword, danewsroom])
 
 df_da = pd.read_csv("/data-big-projects/danish-summarization-danewsroom/df_da.csv")
 df_en = pd.read_csv(
     "/data-big-projects/danish-summarization-danewsroom/df_en.csv", usecols=["document"]
 )
-# df_da = df_da.sample(1000000, random_state=22)
-# df_en = df_en.sample(1000000, random_state=22)
+
 cnt_da = Counter()
 for text in tqdm(df_da.text):
     cnt_da.update(tokenizer.encode(text))
@@ -128,7 +127,7 @@ for new_id, old_id in enumerate(kept_ids):
 model.shared.weight = new_emb.weight
 model.lm_head.weight = new_head.weight
 
-#!protoc -I=. --python_out=. src/model/sentencepiece_model.proto
+!protoc -I=. --python_out=. src/model/sentencepiece_model.proto
 
 
 smp = tokenizer.sp_model.serialized_model_proto()
