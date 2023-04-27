@@ -5,7 +5,7 @@
 
   <em><a href="https://github.com/sarakolding"><strong>Sara Kolding</strong></a>, <a href="https://github.com/katrinenymann"><strong>Katrine Nymann</strong></a>, <a href="https://github.com/idabh"><strong>Ida Bang Hansen</strong></a>, <a href="https://github.com/KennethEnevoldsen"><strong>Kenneth C. Enevoldsen</strong></a> & <a href="https://github.com/rdkm89"><strong>Ross Deans Kristensen-McLachlan</strong></a></em>
   <br />
-    <a href="https://huggingface.co/sarakolding/daT5-summariser"><strong>Access our model through huggingface</strong></a>
+    <a href="https://huggingface.co/Danish-summarisation"><strong>Access our models through huggingface</strong></a>
     <br />
   </p>
 </div>
@@ -34,11 +34,11 @@ model output and methods for referenceless evaluation of summaries. <br>
 ### Model performance
 These are the quantitative results of our model-generated summaries:
 
-| Model | BERTScore | ROUGE-1 | ROUGE-2 | ROUGE-L |
+| Model |  ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-small"> **DanSum-mT5-small** </a> | x  | x  | x  | x  |
-| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-base"> **DanSum-mT5-base** | x  | x  | x  | x  |
-| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-large"> **DanSum-mT5-large** | x  | x  | x  | x  |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-small"> **DanSum-mT5-small** </a> | 21.42 [21.26, 21.55]  |  6.21 [6.11, 6.30]  |  16.10 [15.98, 16.22]  | 88.28 [88.26, 88.31] |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-base"> **DanSum-mT5-base** | 23.21 [23.06, 23.36]  | 7.12 [7.00, 7.22]  | 17.64 [17.50, 17.79]  |  88.77 [88.74, 88.80] |
+| <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-large"> **DanSum-mT5-large** | 23.76 [23.60, 23.91]  |  7.46 [7.35, 7.59]  | 18.25 [18.12, 18.39]  |  88.97 [88.95, 89.00] |
 
 To get a better understanding of the model's performance, we also had two of the authors to blindly (without knowledge of which model generated which summary) rank the model-generated summaries for 100 articles. The results are shown in the table below:
 
