@@ -12,9 +12,9 @@
 
 ## About The Project
 
-This repository contains the code for creating an automatic abstractive summarisation tool in Danish. We fine-tuned a language-specific pruned mT5 model on an abstractive subset of the DaNewsroom dataset.
+This repository contains the code for developing an automatic abstractive summarisation tool in Danish.
 
-The model can be used for summarisation of individual news articles using [this notebook](https://github.com/idabh/data-science-exam/blob/main/generate_summary.ipynb), or through the [huggingface API](https://huggingface.co/sarakolding/daT5-summariser).
+The model can be used for summarisation of individual news articles through the [huggingface API](https://huggingface.co/Danish-summarisation/DanSum-mT5-large).
 
 ### Abstract
 Automatic abstractive text summarization
@@ -52,19 +52,18 @@ Where reference is the original summary.
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
 * Clone the repo
    ```sh
-   git clone https://github.com/idabh/data-science-exam
+   git clone https://github.com/Danish-summarisation/DanSum
    ```
 * Install required modules
   ```sh
   pip install -r requirements.txt
   ```
 
-## Contact
-Ida Bang Hansen - idabanghansen@gmail.com
-<br />
-Sara Kolding - sarakolding@live.dk
-<br />
-Katrine Nymann - katrinesofienm@hotmail.dk
+├── src
+│   ├── external       <- Data from third party sources.
+│   ├── interim        <- Intermediate data that has been transformed.
+│   ├── processed      <- The final, canonical data sets for modeling.
+│   └── raw            <- The original, immutable data dump.
 
 ## Acknowledgments
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
