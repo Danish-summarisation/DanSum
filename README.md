@@ -32,7 +32,7 @@ model output and methods for referenceless evaluation of summaries. <br>
 ***Key words:** automatic summarisation, transformers, Danish, natural language processing*
 
 ### Model performance
-These are the quantitative results of our model-generated summaries:
+The models were fine-tuned using <a href="https://wandb.ai/danish-summarisation/danewsroom/reports/Danish-Summarisation-hyperparameter-search--VmlldzoyNjk4MTMw?accessToken=cu0krm4f24m7qh3j2ilxhrac9f8zika9kerh3q3gzty51xy40a44vjyteffj9sc0">hyperparameter search</a>. These are the quantitative results of our model-generated summaries:
 
 | Model |  ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -45,9 +45,6 @@ To get a better understanding of the model's performance, we also had two of the
 
 Where reference is the original summary.
 
-
-
-
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
 * Clone the repo
@@ -59,21 +56,7 @@ Where reference is the original summary.
   pip install -r requirements.txt
   ```
 
-    
-## Project organisation
-├── README.md          <- The top-level README for developers using this project.
-├── src                <- Source code for use in this project.       <- A default Sphinx project; see sphinx-doc.
-│   ├── __init__.py    <- Makes src a Python module
-│   ├── forced_admissions_cohort.py    <- Script that generates data frames for projects
-│   │
-│   ├── loaders           <- Scripts to load in data from SQL database
-│   │   └── load_data_function.py
-│   │
-│   └── writers.py  <- Scripts to create exploratory and results oriented visualizations
-│
-├──  requirements.txt
-                                  
-                           
+             
 ## Acknowledgments
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
 
