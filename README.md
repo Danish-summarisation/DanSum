@@ -56,4 +56,3 @@ To get a better understanding of the model's performance, we also had two of the
              
 ## Acknowledgments
 *  DAT5 icon created with [OpenAI's DALL-E 2](https://openai.com/dall-e-2/)
-

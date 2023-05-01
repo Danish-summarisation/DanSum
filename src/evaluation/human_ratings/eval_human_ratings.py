@@ -92,9 +92,8 @@ df_ida = df_ida.rename(
 )
 
 # Now dataframes are ready for the appendix
-df_kat.to_csv("ratings_kat_cleaned.csv")
-df_ida.to_csv("ratings_ida_cleaned.csv")
-#
+df_kat.to_csv("../../../data/ratings_kat_cleaned.csv")
+df_ida.to_csv("../../../data/ratings_ida_cleaned.csv")
 
 # both = pd.concat([df_kat, df_ida])
 
