@@ -18,17 +18,13 @@ def flatten_nested_config(
     sep: str = ".",
 ) -> Dict:
     """Recursively flatten an infinitely nested config. E.g. {"level1":
-
     {"level2": "level3": {"level4": 5}}}} becomes:
-
     {"level1.level2.level3.level4": 5}.
-
     Args:
         d (Union[Dict, MutableMapping]): Dict to flatten.
         parent_key (str): The parent key for the current dict, e.g. "level1" for the
             first iteration. Defaults to "".
         sep (str): How to separate each level in the dict. Defaults to ".".
-
     Returns:
         Dict: The flattened dict.
     """
@@ -62,33 +58,43 @@ def compute_metrics(decoded_preds, decoded_labels, decoded_inputs, cfg):
     high = {f"{key}_high": value.high.fmeasure for key, value in rouge.items()}
     result = {"low": low, "mid": mid, "high": high}
 
-    # # compute BERTScores
-    # bertscores = bert_metric.compute(
-    #     predictions=decoded_preds, references=decoded_labels, lang=cfg.language
-    # )
-    # result["bertscore"] = np.mean(bertscores["f1"])
-
     # compute BERTScores
     bertscores = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
     )
-    result["bertscore_mean"] = np.mean(bertscores["f1"])
-    samples = np.random.choice(bertscores["f1"], 1000)
+    mean_bertscore = [None] * 1000
+
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(bertscores["f1"])), size=len(bertscores["f1"]))
+      sample = [bertscores["f1"][x] for x in sample_idx]
+      mean_bertscore[i] = np.mean(sample)
+    
     percentile_delta = (1 - 0.95) / 2
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
-    result["bertscore_low"] = np.percentile(samples, q, axis=0)[0]
-    result["bertscore_mid"] = np.percentile(samples, q, axis=0)[1]
-    result["bertscore_high"] = np.percentile(samples, q, axis=0)[2]
+    result["bertscore_low"] = np.percentile(mean_bertscore, q)[0]
+    result["bertscore_mid"] = np.percentile(mean_bertscore, q)[1]
+    result["bertscore_high"] = np.percentile(mean_bertscore, q)[2]
+    result["bertscore_mean"] = np.mean(bertscores["f1"])
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
     density = [frag.density() for frag in fragment]
-    result["density_mean"] = np.mean(density)
-    samples = np.random.choice(density, 1000)
+    
+    mean_density = [None] * 1000
+
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(density)), size=len(density))
+      sample = [density[x] for x in sample_idx]
+      mean_density[i] = np.mean(sample)
+    
+    percentile_delta = (1 - 0.95) / 2
     q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
-    result["density_low"] = np.percentile(samples, q, axis=0)[0]
-    result["density_mid"] = np.percentile(samples, q, axis=0)[1]
-    result["density_high"] = np.percentile(samples, q, axis=0)[2]
+    result["density_low"] = np.percentile(mean_density, q)[0]
+    result["density_mid"] = np.percentile(mean_density, q)[1]
+    result["density_high"] = np.percentile(mean_density, q)[2]
+    result["density_mean"] = np.mean(density)
 
     metrics = result 
 

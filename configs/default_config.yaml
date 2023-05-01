@@ -59,17 +59,17 @@ training:
   gradient_accumulation_steps: 1
   #max_steps: 10
   
-# hydra:
-#   sweeper:
-#     params:
-#       model_checkpoint: choice("/data-big-projects/danish-summarization-danewsroom/models/crimson-plasma-287/checkpoint-129080", "/data-big-projects/danish-summarization-danewsroom/models/chocolate-haze-288/checkpoint-129080", "/data-big-projects/danish-summarization-danewsroom/models/earnest-shadow-289/checkpoint-129070")
-#       training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
-#       model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
-#       training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
-#       # training.num_train_epochs: int(interval(1, 10)) # (1, 41)
-#       model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
-#       model.length_penalty: int(interval(4, 7)) # (4, 10)
-#       training.max_grad_norm: int(interval(1, 10))
-#       training_data.quality_filter: choice(True, False)
-#       training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
+hydra:
+  sweeper:
+    params:
+      model_checkpoint: choice("/data-big-projects/danish-summarization-danewsroom/models/crimson-plasma-287/checkpoint-129080", "/data-big-projects/danish-summarization-danewsroom/models/chocolate-haze-288/checkpoint-129080", "/data-big-projects/danish-summarization-danewsroom/models/earnest-shadow-289/checkpoint-129070")
+      training.learning_rate: interval(5e-5, 5e-4) # (5e-6, 5e-4)
+      model.dropout_rate: interval(0.0, 0.1) # (0.0, 0.3)
+      training.lr_scheduler_type: choice("constant", "linear", "cosine", "polynomial") 
+      # training.num_train_epochs: int(interval(1, 10)) # (1, 41)
+      model.no_repeat_ngram_size: int(interval(3, 5)) # (2, 5)
+      model.length_penalty: int(interval(4, 7)) # (4, 10)
+      training.max_grad_norm: int(interval(1, 10))
+      training_data.quality_filter: choice(True, False)
+      training_data.summary_type: choice(["abstractive"], ["abstractive", "mixed"], ["abstractive", "mixed", "extractive"])
 

@@ -21,33 +21,26 @@ python train.py --config config.yaml
 ```
 """
 import os
-import time
 import ssl
+import time
 from functools import partial
 
-import nltk
-
-import numpy as np
-import pandas as pd
-
-import wandb
-
-import hydra
-from omegaconf import DictConfig
-
 import datasets
-from fragments import Fragments
-
+import hydra
+import nltk
+import numpy as np
+import wandb
 from datasets import load_dataset
+from fragments import Fragments
+from omegaconf import DictConfig
 from transformers import (
     AutoModelForSeq2SeqLM,
+    AutoTokenizer,
     DataCollatorForSeq2Seq,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
     T5Tokenizer,
-    AutoTokenizer,
 )
-
 from utils import flatten_nested_config
 
 
@@ -123,40 +116,57 @@ def compute_metrics(eval_pred, tokenizer, cfg):
     ]
 
     # compute ROUGE scores
-    result = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels)
-    result = {key: value.mid.fmeasure for key, value in result.items()}
+    rouge = rouge_metric.compute(predictions=decoded_preds, references=decoded_labels, use_aggregator=True)
+    mid = {f"{key}_mid": value.mid.fmeasure for key, value in rouge.items()}
+    low = {f"{key}_low": value.low.fmeasure for key, value in rouge.items()}
+    high = {f"{key}_high": value.high.fmeasure for key, value in rouge.items()}
+    result = {"low": low, "mid": mid, "high": high}
 
     # compute BERTScores
     bertscores = bert_metric.compute(
-        predictions=decoded_preds, references=decoded_labels, lang=cfg.language
-    )
-    result["bertscore"] = np.mean(bertscores["f1"])
-
-    # compute BERTScores
-    bertscores_r = bert_metric.compute(
         predictions=decoded_preds, references=decoded_labels, lang=cfg.language, model_type="xlm-roberta-large"
     )
-    result["bertscore_r"] = np.mean(bertscores_r["f1"])
+    mean_bertscore = [None] * 1000
+
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(bertscores["f1"])), size=len(bertscores["f1"]))
+      sample = [bertscores["f1"][x] for x in sample_idx]
+      mean_bertscore[i] = np.mean(sample)
+    
+    percentile_delta = (1 - 0.95) / 2
+    q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
+    result["bertscore_low"] = np.percentile(mean_bertscore, q)[0]
+    result["bertscore_mid"] = np.percentile(mean_bertscore, q)[1]
+    result["bertscore_high"] = np.percentile(mean_bertscore, q)[2]
+    result["bertscore_mean"] = np.mean(bertscores["f1"])
 
     # compute density
     fragment = [Fragments(decoded_pred, decoded_input, lang=cfg.language) for decoded_pred, decoded_input in zip(decoded_preds, decoded_inputs)]
     density = [frag.density() for frag in fragment]
-    result["density"] = np.mean(density)
+    
+    mean_density = [None] * 1000
 
-    # add mean generated length
-    prediction_lens = [
-        np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions
-    ]
-    result["gen_len"] = np.mean(prediction_lens)
+    for i in range(1000):
+      sample_idx = np.random.choice(
+          np.arange(len(density)), size=len(density))
+      sample = [density[x] for x in sample_idx]
+      mean_density[i] = np.mean(sample)
+    
+    percentile_delta = (1 - 0.95) / 2
+    q = 100 * np.array([percentile_delta, 0.5, 1 - percentile_delta])
+    result["density_low"] = np.percentile(mean_density, q)[0]
+    result["density_mid"] = np.percentile(mean_density, q)[1]
+    result["density_high"] = np.percentile(mean_density, q)[2]
+    result["density_mean"] = np.mean(density)
 
-    # round to 4 decimals
-    metrics = {k: round(v, 4) for k, v in result.items()}
+    metrics = result
 
     # log predictions on wandb
     artifact = wandb.Artifact("summaries-" + str(wandb.run.name), type="predictions")
     summary_table = wandb.Table(columns=['references', 'predictions'], data=[[ref, pred] for ref, pred in zip(decoded_labels[0:100], decoded_preds[0:100])])
     artifact.add(summary_table, "summaries")
-    wandb.run.log_artifact(artifact)      
+    wandb.run.log_artifact(artifact)
 
     return metrics
 
@@ -221,10 +231,14 @@ def main(cfg: DictConfig) -> None:
     summary_types = cfg.training_data.summary_type  # a list
 
     if "mixed" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "mixed")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "mixed"
+        )
 
     if "extractive" not in summary_types:
-        tokenized_datasets['train'] = tokenized_datasets['train'].filter(lambda x: x["density_bin"] != "extractive")
+        tokenized_datasets["train"] = tokenized_datasets["train"].filter(
+            lambda x: x["density_bin"] != "extractive"
+        )
 
     # Fine-tuning
     # load the pretrained mT5 model from the Huggingface hub
@@ -249,15 +263,14 @@ def main(cfg: DictConfig) -> None:
         per_device_train_batch_size=cfg.training.per_device_train_batch_size,
         per_device_eval_batch_size=cfg.training.per_device_eval_batch_size,
         logging_steps=cfg.training.logging_steps,
-        #save_steps=cfg.training.save_steps,
-        #eval_steps=cfg.training.eval_steps,
+        save_steps=cfg.training.save_steps,
+        eval_steps=cfg.training.eval_steps,
         warmup_steps=cfg.training.warmup_steps,
         save_total_limit=cfg.training.save_total_limit,
         num_train_epochs=cfg.training.num_train_epochs,
         predict_with_generate=cfg.training.predict_with_generate,
         overwrite_output_dir=cfg.training.overwrite_output_dir,
         fp16=cfg.training.fp16,
-        #load_best_model_at_end=cfg.training.load_best_model_at_end,
         metric_for_best_model=cfg.training.metric_for_best_model,
         max_grad_norm=cfg.training.max_grad_norm,
         include_inputs_for_metrics=cfg.training.include_inputs_for_metrics,
@@ -277,8 +290,6 @@ def main(cfg: DictConfig) -> None:
         args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["validation"],
-        # limit eval dataset
-        # eval_dataset = tokenized_datasets["validation"].select(range(cfg.training_data.max_eval_samples)),
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=_compute_metrics,
