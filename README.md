@@ -40,10 +40,7 @@ The models were fine-tuned using <a href="https://wandb.ai/danish-summarisation/
 | <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-base"> **DanSum-mT5-base** | 23.21 [23.06, 23.36]  | 7.12 [7.00, 7.22]  | 17.64 [17.50, 17.79]  |  88.77 [88.74, 88.80] |
 | <a href="https://huggingface.co/Danish-summarisation/DanSum-mT5-large"> **DanSum-mT5-large** | 23.76 [23.60, 23.91]  |  7.46 [7.35, 7.59]  | 18.25 [18.12, 18.39]  |  88.97 [88.95, 89.00] |
 
-To get a better understanding of the model's performance, we also had two of the authors to blindly (without knowledge of which model generated which summary) rank the model-generated summaries for 100 articles. The results are shown in the table below:
-
-
-Where reference is the original summary.
+To get a better understanding of the model's performance, we also had two of the authors to blindly (without knowledge of which model generated which summary) rank the model-generated summaries for 100 articles.
 
 ### Get started
 * The DaNewsroom data set can be accessed upon request (https://github.com/danielvarab/da-newsroom)
